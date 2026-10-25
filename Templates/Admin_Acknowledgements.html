@@ -1,0 +1,252 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .report-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+    margin: 30px auto;
+    border-top: 5px solid #486E46;
+  }
+
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .report-title {
+    color: #333333;
+    font-weight: 700;
+    margin: 0;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .table-scroll-container {
+    max-height: 520px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+  }
+
+  .custom-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .custom-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #486E46;
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 12px 14px;
+    border: none;
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  .custom-table tbody td {
+    padding: 12px 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+    color: #444444;
+  }
+
+  .custom-table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .badge-mode-gain {
+    background-color: #28a745;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .badge-mode-lesson {
+    background-color: #fd7e14;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .badge-status-verified {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .badge-status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .btn-verify-inline {
+    background-color: #486E46;
+    color: #ffffff;
+    border: none;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+  }
+
+  .btn-verify-inline:hover {
+    background-color: #385636;
+    color: #ffffff;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+  }
+</style>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="report-card">
+      <div class="report-header">
+        <h3 class="report-title">Student Acknowledgements Report</h3>
+        <div>
+        <span class="badge badge-secondary" style="font-size: 0.9rem; padding: 8px 12px;">
+          Total Records: {{ acknowledgements|length }}
+        </span>
+        <a class="badge badge-secondary" style="font-size: 0.9rem; padding: 8px 12px;" href="{% url 'admin_home' %}">&lt;&lt;-Back</a>
+        </div>
+      </div>
+
+      <!-- Messages Alert -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Scrollable Table Container -->
+      <div class="table-scroll-container">
+        <table class="table custom-table table-hover">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Mode</th>
+              <th>Class</th>
+              <th>Student Name</th>
+              <th>Description</th>
+              <th class="text-center">Credit</th>
+              <th class="text-center">Parent Verification</th>
+              <th class="text-center">Principal Verification</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ack in acknowledgements %}
+              <tr>
+                <td style="white-space: nowrap; font-weight: 600;">
+                  {{ ack.Date|date:"d M Y" }}
+                </td>
+                <td>
+                  {% if ack.Mode == 'Gain' %}
+                    <span class="badge-mode-gain">Gain</span>
+                  {% else %}
+                    <span class="badge-mode-lesson">Lesson</span>
+                  {% endif %}
+                </td>
+                <td style="white-space: nowrap;">
+                  {{ ack.Student.Class.Section }} - {{ ack.Student.Class.Class_no }}
+                  {% if ack.Student.Class.Division %}
+                    ({{ ack.Student.Class.Division }})
+                  {% endif %}
+                </td>
+                <td style="font-weight: 600; color: #222;">
+                  {{ ack.Student.Name }}
+                  <br>
+                  <small class="text-muted">Adm No: {{ ack.Student.Admission_no }}</small>
+                </td>
+                <td style="max-width: 250px;">
+                  {{ ack.Description }}
+                </td>
+                <td class="text-center font-weight-bold">
+                  {% if ack.Credit is not None %}
+                    {{ ack.Credit }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  {% if ack.Parent_verification %}
+                    <span class="badge-status-verified">&#10004; Verified</span>
+                  {% else %}
+                    <span class="badge-status-pending">Pending</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  {% if ack.Principal_verification %}
+                    <span class="badge-status-verified">&#10004; Verified</span>
+                  {% else %}
+                    <form method="POST" action="" style="display: inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="ack_id" value="{{ ack.id }}">
+                      <button 
+                        type="submit" 
+                        name="action" 
+                        value="verify_principal" 
+                        class="btn-verify-inline"
+                        title="Click to verify this acknowledgement"
+                      >
+                        Verify Now
+                      </button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="8" class="empty-state">
+                  <h5>No acknowledgement records found.</h5>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

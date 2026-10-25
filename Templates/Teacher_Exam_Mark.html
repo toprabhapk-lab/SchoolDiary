@@ -1,0 +1,168 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .report-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .report-header {
+        border-bottom: 2px solid #486E46;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        color: #333333;
+    }
+
+    .filter-btn {
+        background-color: #486E46;
+        color: #ffffff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .filter-btn:hover {
+        background-color: #385636;
+        color: #ffffff;
+    }
+
+    .table-custom-header {
+        background-color: #486E46;
+        color: #ffffff;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .marks-table th, .marks-table td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 14px;
+        padding: 10px 8px;
+    }
+
+    .sub-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 20px;
+        margin-top: 25px;
+    }
+
+    .badge-status {
+        background-color: #486E46;
+        color: #ffffff;
+        padding: 4px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+</style>
+
+<div class="report-card">
+    <a class="badge badge-secondary float-md-right" style="font-size: 0.9rem; padding: 8px 12px;" href="{% url 'TeacherHome' %}">&lt;&lt; back</a>
+
+    <div class="report-header text-center">
+        <h2><strong>Examination Marks Entry</strong></h2>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-warning text-center">{{ error }}</div>
+    {% endif %}
+
+    <!-- Exam Selection Form -->
+    <form method="get" class="row justify-content-center mb-4">
+        <div class="col-md-7 mb-3">
+            <label for="exam_id" class="font-weight-bold">Select Examination:</label>
+            <select id="exam_id" name="exam_id" class="form-control" onchange="this.form.submit()">
+                <option value="">-- Select Exam --</option>
+                {% for exam in Teacher_subject_exams %}
+                    <option value="{{ exam.id }}" {% if selected_exam and exam.id == selected_exam.id %}selected{% endif %}>
+                        {{ exam.Name }} - Class {{ exam.Subject.Class.Class_no }} {{ exam.Subject.Class.Section }} ({{ exam.Subject.Code }} - {{ exam.Subject.Name }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    {% if selected_exam %}
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-secondary m-0">
+                Exam: <strong>{{ selected_exam.Name }}</strong>
+            </h4>
+            <h5 class="text-secondary m-0">
+                Class & Subject: <strong>{{ selected_exam.Subject.Class.Class_no }}-{{ selected_exam.Subject.Class.Section }} ({{ selected_exam.Subject.Name }})</strong>
+            </h5>
+            <span class="badge-status font-weight-bold" style="font-size: 0.95rem;">
+                Max Mark: {{ selected_exam.Max_mark }}
+            </span>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="exam_id" value="{{ selected_exam.id }}" />
+
+            <div class="table-container mb-4">
+                <table class="table table-bordered table-striped marks-table">
+                    <thead>
+                        <tr class="table-custom-header">
+                            <th style="width: 15%;">Roll No</th>
+                            <th style="text-align: left; width: 55%;">Student Name</th>
+                            <th style="width: 30%;">Marks Obtained (Max: {{ selected_exam.Max_mark }})</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in student_marks %}
+                            <tr>
+                                <td>{{ data.student.Roll_no }}</td>
+                                <td style="text-align: left;"><strong>{{ data.student.Name }}</strong></td>
+                                <td>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <input type="number"
+                                               name="mark_{{ data.student.id }}"
+                                               class="form-control text-center style-input"
+                                               style="max-width: 160px;"
+                                               value="{{ data.score }}"
+                                               min="0"
+                                               max="{{ selected_exam.Max_mark }}"
+                                               placeholder="0 - {{ selected_exam.Max_mark }}"
+                                               required />
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    No students found for this class.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a class="btn btn-secondary mr-2" href="{% url 'TeacherHome' %}">Cancel</a>
+                <button type="submit" class="btn filter-btn">Save Marks</button>
+            </div>
+        </form>
+
+    {% else %}
+        <div class="alert alert-light text-center border my-4 py-4" role="alert">
+            <i class="fas fa-edit fa-2x mb-2" style="color: #486E46;"></i>
+            <p class="mb-0 text-muted">Please select an examination from the dropdown above to view and enter student marks.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

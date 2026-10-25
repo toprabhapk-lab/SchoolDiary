@@ -1,0 +1,238 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .report-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .report-header {
+        border-bottom: 2px solid #486E46;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        color: #333333;
+    }
+
+    .filter-btn {
+        background-color: #486E46;
+        color: #ffffff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .filter-btn:hover {
+        background-color: #385636;
+        color: #ffffff;
+    }
+
+    .table-custom-header {
+        background-color: #486E46;
+        color: #ffffff;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .hw-table th, .hw-table td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 14px;
+        padding: 10px 8px;
+    }
+
+    .sub-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 20px;
+        margin-top: 25px;
+    }
+
+    .badge-status {
+        background-color: #486E46;
+        color: #ffffff;
+        padding: 4px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+</style>
+
+<div class="report-card">
+    <a class="badge badge-secondary float-md-right" style="font-size: 0.9rem; padding: 8px 12px;" href="{% url 'TeacherHome' %}">&lt;&lt; back</a>
+
+    <div class="report-header text-center">
+        <h2><strong>Student Homework Management</strong></h2>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-warning text-center">{{ error }}</div>
+    {% endif %}
+
+    <!-- Subject Selection Form -->
+    <form method="get" class="row justify-content-center mb-4">
+        <div class="col-md-6 mb-3">
+            <label for="subject" class="font-weight-bold">Select Class &amp; Subject:</label>
+            <select id="subject" name="subject" class="form-control" onchange="this.form.submit()">
+                <option value="">-- Select Subject --</option>
+                {% for s in subjects %}
+                    <option value="{{ s.id }}" {% if selected_subject and s.id == selected_subject.id %}selected{% endif %}>
+                        {{ s.Class.Class_no }} - {{ s.Class.Section }} | {{ s.Code }} - {{ s.Name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    {% if selected_subject %}
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-secondary m-0">
+                Class: <strong>{{ selected_subject.Class.Class_no }}-{{ selected_subject.Class.Section }}</strong>
+            </h4>
+            <h5 class="text-secondary m-0">
+                Subject: <strong>{{ selected_subject.Code }} - {{ selected_subject.Name }}</strong>
+            </h5>
+        </div>
+
+        <!-- Homework History Table -->
+        <h5 class="font-weight-bold mt-4 mb-2 text-dark"><i class="fas fa-history mr-2"></i>Homework History</h5>
+        <div class="table-container style="max-height: 350px; overflow-y: auto;">
+            <table class="table table-bordered table-striped hw-table">
+                <thead>
+                    <tr class="table-custom-header">
+                        <th style="width: 15%;">Date Of Issue</th>
+                        <th style="width: 50%; text-align: left;">Description</th>
+                        <th style="width: 15%;">Submission Date</th>
+                        <th style="width: 20%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in homeworks %}
+                        <tr {% if selected_homework and selected_homework.id == c.id %}class="table-warning"{% endif %}>
+                            <td><span class="badge-status">{{ c.DateOfIssue|date:"d M Y" }}</span></td>
+                            <td style="text-align: left; white-space: pre-wrap;">{{ c.Description }}</td>
+                            <td>{{ c.Submission_date|date:"d M Y" }}</td>
+                            <td>
+                                <a href="?subject={{ selected_subject.id }}&verify_hw={{ c.id }}" class="btn filter-btn btn-sm">
+                                    Verify Submissions
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                No homework assigned yet for this subject.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Verify Submissions Section -->
+        {% if selected_homework %}
+            <div class="sub-card shadow-sm">
+                <h4 class="text-dark font-weight-bold mb-3">
+                    <i class="fas fa-check-circle mr-2" style="color: #486E46;"></i>
+                    Verify Submissions for: <span class="text-secondary">"{{ selected_homework.Description }}"</span>
+                </h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="subject" value="{{ selected_subject.id }}" />
+                    <input type="hidden" name="action" value="update_submissions" />
+                    <input type="hidden" name="homework_id" value="{{ selected_homework.id }}" />
+
+                    <div class="table-container mb-3">
+                        <table class="table table-bordered hw-table bg-white">
+                            <thead>
+                                <tr class="table-custom-header">
+                                    <th style="width: 15%;">Roll No</th>
+                                    <th style="text-align: left; width: 40%;">Student Name</th>
+                                    <th style="width: 25%;">Submitted Date</th>
+                                    <th style="width: 20%;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                    <tr>
+                                        <td>{{ student.Roll_no }}</td>
+                                        <td style="text-align: left;"><strong>{{ student.Name }}</strong></td>
+                                        <td>
+                                            <input type="date"
+                                                name="submitted_date_{{ student.id }}"
+                                                class="form-control form-control-sm text-center"
+                                                value="{% if student.done_date %}{{ student.done_date|date:'Y-m-d' }}{% else %}{{ today_date|date:'Y-m-d' }}{% endif %}" />
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox"
+                                                    class="custom-control-input"
+                                                    id="submitted_{{ student.id }}"
+                                                    name="submitted_{{ student.id }}"
+                                                    value="1"
+                                                    {% if student.is_submitted %}checked{% endif %} />
+                                                <label class="custom-control-label font-weight-bold" for="submitted_{{ student.id }}">
+                                                    Submitted
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">
+                                            No students enrolled in this class.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="submit" class="btn filter-btn">Update Homework Submission</button>
+                </form>
+            </div>
+        {% endif %}
+
+        <!-- Add New Homework Section -->
+        <div class="sub-card shadow-sm">
+            <h4 class="text-dark font-weight-bold mb-3">
+                <i class="fas fa-plus-circle mr-2" style="color: #486E46;"></i>Add New Homework
+            </h4>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="subject" value="{{ selected_subject.id }}" />
+                <input type="hidden" name="action" value="add_homework" />
+
+                <div class="form-group">
+                    <label for="Description" class="font-weight-bold">Homework Description</label>
+                    <textarea id="Description" name="Description" class="form-control" rows="3" placeholder="Enter assignment instructions or details..." required></textarea>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <label for="Submission_date" class="font-weight-bold">Submission Date</label>
+                        <input id="Submission_date" name="Submission_date" type="date" class="form-control" value="{{ today_date|date:'Y-m-d' }}" />
+                    </div>
+                </div>
+                <button type="submit" class="btn filter-btn">Save Homework</button>
+            </form>
+        </div>
+
+    {% else %}
+        <div class="alert alert-light text-center border my-4 py-4" role="alert">
+            <i class="fas fa-book-open fa-2x mb-2" style="color: #486E46;"></i>
+            <p class="mb-0 text-muted">Please select a class and subject above to view or assign homework.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

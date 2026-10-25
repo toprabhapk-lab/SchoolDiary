@@ -1,0 +1,79 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Add New Teacher</h3>
+            <small class="text-muted">Register a new faculty member into the school system</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Form Section -->
+    <form method="POST" action="{% url 'Add_new_teacher' %}">
+        {% csrf_token %}
+
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <!-- Card Header -->
+            <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+                <i class="fas fa-chalkboard-teacher mr-2"></i> Teacher Information
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body bg-white">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold" style="color: #2c442a;">Teacher Code <span class="text-danger">*</span></label>
+                        <input type="text" name="Code" value="{{ request.POST.Code }}" class="form-control" placeholder="Enter Teacher Code" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold" style="color: #2c442a;">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" value="{{ request.POST.Name }}" class="form-control" placeholder="Enter Full Name" required style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Designation <span class="text-danger">*</span></label>
+                        <input type="text" name="Designation" value="{{ request.POST.Designation }}" class="form-control" placeholder="e.g. Senior Teacher" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Mobile Number <span class="text-danger">*</span></label>
+                        <input type="tel" name="MobileNumber" value="{{ request.POST.MobileNumber }}" class="form-control" placeholder="Enter Mobile Number" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Email Address</label>
+                        <input type="email" name="Email" value="{{ request.POST.Email }}" class="form-control" placeholder="e.g. teacher@school.com" style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Action Buttons -->
+        <div class="mb-5 text-right">
+            <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;">
+                <i class="fas fa-save mr-1"></i> Save Teacher
+            </button>
+            <a class="btn btn-secondary px-4 py-2 ml-2" href="{% url 'AdminPrincipalFrame' %}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

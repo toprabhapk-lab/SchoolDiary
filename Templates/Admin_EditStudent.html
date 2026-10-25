@@ -1,0 +1,331 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Edit Student Details</h3>
+            <small class="text-muted">Select class and student to edit academic and personal records</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- FORM 1: SELECTION DROPDOWNS -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body bg-white p-3">
+            <form method="GET" action="{% url 'Admin_EditStudent' %}" id="selectionForm">
+                <div class="form-row align-items-center">
+                    <!-- Step 1: Select Class -->
+                    <div class="col-md-5 mb-2 mb-md-0">
+                        <label for="class_id" class="font-weight-bold mb-1" style="color: #2c442a;">1. Select Class:</label>
+                        <select name="class_id" id="class_id" class="form-control" onchange="this.form.submit()" style="border-color: #d4e2d4;">
+                            <option value="">-- Choose Class --</option>
+                            {% for c in classes %}
+                                <option value="{{ c.id }}" {% if selected_class_id == c.id|stringformat:"s" %}selected{% endif %}>
+                                    Class {{ c.Class_no }} - {{ c.Section }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Step 2: Select Student -->
+                    <div class="col-md-7">
+                        <label for="student_id" class="font-weight-bold mb-1" style="color: #2c442a;">2. Select Student to Edit:</label>
+                        <select id="student_id" name="student_id" class="form-control" onchange="this.form.submit()" {% if not students %}disabled{% endif %} style="border-color: #d4e2d4;">
+                            <option value="">-- Choose Student --</option>
+                            {% for s in students %}
+                                <option value="{{ s.id }}" {% if selected_student_id == s.id|stringformat:"s" %}selected{% endif %}>
+                                    Roll {{ s.Roll_no }} - {{ s.Name }} (Adm: {{ s.Admission_no }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FORM 2: EDIT STUDENT FORM -->
+    {% if student %}
+    <form method="POST" action="{% url 'Admin_EditStudent' %}">
+        {% csrf_token %}
+        <input type="hidden" name="update_student" value="1">
+        <input type="hidden" name="student_id" value="{{ student.id }}">
+
+        <!-- 1. ACADEMIC & PERSONAL DETAILS CARD -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+                <i class="fas fa-user-edit mr-2"></i> Student Details
+            </div>
+            <div class="card-body bg-white">
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Admission No <span class="text-danger">*</span></label>
+                        <input type="text" name="Admission_no" value="{{ student.Admission_no }}" class="form-control" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Admission Date <span class="text-danger">*</span></label>
+                        <input type="date" name="Adm_date" value="{{ student.Adm_date|date:'Y-m-d' }}" class="form-control" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Class <span class="text-danger">*</span></label>
+                        <select name="Class" class="form-control" required style="border-color: #d4e2d4;">
+                            {% for c in classes %}
+                                <option value="{{ c.id }}" {% if student.Class.id == c.id %}selected{% endif %}>
+                                    Class {{ c.Class_no }} - {{ c.Section }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold" style="color: #2c442a;">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" value="{{ student.Name }}" class="form-control" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Gender <span class="text-danger">*</span></label>
+                        <select name="Gender" class="form-control" required style="border-color: #d4e2d4;">
+                            <option value="Male" {% if student.Gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if student.Gender == 'Female' %}selected{% endif %}>Female</option>
+                            <option value="Other" {% if student.Gender == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">DOB <span class="text-danger">*</span></label>
+                        <input type="date" name="DOB" value="{{ student.DOB|date:'Y-m-d' }}" class="form-control" required style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Blood Group</label>
+                        <select name="Blood_group" class="form-control" style="border-color: #d4e2d4;">
+                            <option value="A+VE">A+VE</option>
+                            <option value="A-VE">A-VE</option>
+                            <option value="B+VE">B+VE</option>
+                            <option value="B-VE">B-VE</option>
+                            <option value="AB+VE">AB+VE</option>
+                            <option value="AB-VE">AB-VE</option>
+                            <option value="O+VE">O+VE</option>
+                            <option value="O-VE">O-VE</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Mobile Number</label>
+                        <input type="number" name="MobileNumber" value="{{ student.MobileNumber|default:'' }}" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Category</label>
+                        <input type="text" name="Category" value="{{ student.Category|default:'' }}" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Caste</label>
+                        <input type="text" name="Caste" value="{{ student.Caste|default:'' }}" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Religion</label>
+                        <input type="text" name="Religion" value="{{ student.Religion|default:'' }}" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">APL / BPL</label>
+                        <select name="APL_BPL" class="form-control" style="border-color: #d4e2d4;">
+                            <option value="APL" {% if student.APL_BPL == 'APL' %}selected{% endif %}>APL</option>
+                            <option value="BPL" {% if student.APL_BPL == 'BPL' %}selected{% endif %}>BPL</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Aadhar Number</label>
+                        <input type="text" name="Aadhar" value="{{ student.Aadhar|default:'' }}" maxlength="12" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Local Body</label>
+                        <input type="text" name="Local_body" value="{{ student.Local_body|default:'' }}" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold" style="color: #2c442a;">Address <span class="text-danger">*</span></label>
+                    <textarea name="Address" class="form-control" rows="2" required style="border-color: #d4e2d4;">{{ student.Address }}</textarea>
+                </div>
+
+                <!-- Banking Sub-Section -->
+                <div class="p-3 rounded mt-3" style="background-color: #f4f8f4; border: 1px solid #d4e2d4;">
+                    <h6 class="font-weight-bold mb-3" style="color: #486E46;">
+                        <i class="fas fa-university mr-2"></i> Bank Details
+                    </h6>
+                    <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                            <label class="font-weight-bold" style="color: #2c442a;">Bank Account No</label>
+                            <input type="text" name="Bank_ac" value="{{ student.Bank_ac|default:'' }}" class="form-control bg-white" style="border-color: #d4e2d4;">
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                            <label class="font-weight-bold" style="color: #2c442a;">Bank Name</label>
+                            <input type="text" name="Bank_name" value="{{ student.Bank_name|default:'' }}" class="form-control bg-white" style="border-color: #d4e2d4;">
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                            <label class="font-weight-bold" style="color: #2c442a;">IFSC Code</label>
+                            <input type="text" name="IFSC" value="{{ student.IFSC|default:'' }}" class="form-control bg-white" style="border-color: #d4e2d4;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PARENT INFORMATION CARD -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #385636;">
+                <i class="fas fa-users mr-2"></i> Parent & Guardian Details
+            </div>
+            <div class="card-body bg-white">
+                <div class="row">
+                    <!-- Father's Box -->
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded" style="background-color: #f9fbf9; border-color: #d4e2d4 !important;">
+                            <h6 class="font-weight-bold pb-2" style="color: #486E46; border-bottom: 2px solid #d4e2d4;">Father's Details</h6>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Father's Name <span class="text-danger">*</span></label>
+                                <input type="text" name="Father_name" value="{{ parent.Father_name|default:'' }}" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Occupation</label>
+                                <input type="text" name="F_occupation" value="{{ parent.F_occupation|default:'' }}" class="form-control bg-white" style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold" style="color: #2c442a;">Phone Number <span class="text-danger">*</span></label>
+                                <input type="number" name="F_phone" value="{{ parent.F_phone|default:'' }}" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mother's Box -->
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded" style="background-color: #f9fbf9; border-color: #d4e2d4 !important;">
+                            <h6 class="font-weight-bold pb-2" style="color: #486E46; border-bottom: 2px solid #d4e2d4;">Mother's Details</h6>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Mother's Name <span class="text-danger">*</span></label>
+                                <input type="text" name="Mother_name" value="{{ parent.Mother_name|default:'' }}" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Occupation</label>
+                                <input type="text" name="M_occupation" value="{{ parent.M_occupation|default:'' }}" class="form-control bg-white" style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold" style="color: #2c442a;">Phone Number <span class="text-danger">*</span></label>
+                                <input type="number" name="M_phone" value="{{ parent.M_phone|default:'' }}" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SIBLING INFORMATION CARD -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #51714f;">
+                <i class="fas fa-child mr-2"></i> Sibling Information (Optional)
+            </div>
+            <div class="card-body bg-white">
+                <!-- Existing Siblings List -->
+                {% if existing_siblings %}
+                <div class="mb-3">
+                    <label class="font-weight-bold" style="color: #2c442a;">Current Recorded Siblings:</label>
+                    <ul class="list-group mb-3">
+                    {% for sib in existing_siblings %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2" style="border-color: #d4e2d4; background-color: #f9fbf9;">
+                            <span><i class="fas fa-user-friends mr-2 text-muted"></i><strong>{{ sib.Sibling_student.Name }}</strong></span>
+                            <span class="badge badge-pill text-white" style="background-color: #385636;">Class {{ sib.Sibling_student.Class.Class_no }} - {{ sib.Sibling_student.Class.Section }}</span>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                <!-- Dynamic Sibling Dropdowns -->
+                {% for i in "123" %}
+                <div class="form-row align-items-center mb-3 p-2 rounded" style="background-color: #f4f8f4;">
+                    <div class="col-md-2 font-weight-bold" style="color: #2c442a;">Sibling {{ i }}:</div>
+                    <div class="form-group col-md-5 mb-0">
+                        <select class="form-control sibling-class-select bg-white" data-target="#sibling_{{ i }}_student" style="border-color: #d4e2d4;">
+                            <option value="">-- Select Class --</option>
+                            {% for c in classes %}
+                                <option value="{{ c.id }}">Class {{ c.Class_no }} - {{ c.Section }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-5 mb-0">
+                        <select name="sibling_{{ i }}_student" id="sibling_{{ i }}_student" class="form-control bg-white" style="border-color: #d4e2d4;">
+                            <option value="">-- Select Student --</option>
+                        </select>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mb-5 text-right">
+            <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;">
+                <i class="fas fa-sync-alt mr-1"></i> Update Student Data
+            </button>
+            <a class="btn btn-secondary px-4 py-2 ml-2" href="{% url 'Admin_EditStudent' %}">Cancel</a>
+        </div>
+    </form>
+    {% elif selected_class_id %}
+    <div class="card shadow-sm border-0 p-5 text-center" style="border-radius: 8px;">
+        <div class="text-muted">
+            <i class="fas fa-user-graduate fa-3x mb-3" style="color: #d4e2d4;"></i>
+            <h5>Select a Student</h5>
+            <p class="small mb-0">Choose a student from dropdown #2 to load and edit their data.</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="card shadow-sm border-0 p-5 text-center" style="border-radius: 8px;">
+        <div class="text-muted">
+            <i class="fas fa-search fa-3x mb-3" style="color: #d4e2d4;"></i>
+            <h5>Select Class & Student</h5>
+            <p class="small mb-0">Start by choosing a class to load students for editing.</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- AJAX Script for Dynamic Sibling Dropdowns -->
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $('.sibling-class-select').on('change', function() {
+        var classId = $(this).val();
+        var targetDropdown = $($(this).data('target'));
+
+        targetDropdown.empty().append('<option value="">-- Select Student --</option>');
+
+        if (classId) {
+            $.ajax({
+                url: "{% url 'get_students_by_class' %}",
+                data: { 'class_id': classId },
+                dataType: 'json',
+                success: function(data) {
+                    $.each(data, function(index, student) {
+                        targetDropdown.append(
+                            $('<option></option>')
+                                .val(student.id)
+                                .text(student.Name + ' (' + student.Admission_no + ')')
+                        );
+                    });
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

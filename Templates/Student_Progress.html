@@ -1,0 +1,75 @@
+{% extends 'StudentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow-sm bg-white" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #486E46;">Academic Progress & Exam Marks</h3>
+            <small class="text-muted">
+                Student: <strong style="color: #2c442a;">{{ student.Name }}</strong> |
+                Class: <strong style="color: #2c442a;">{{ student.Class.Class_no }} - {{ student.Class.Section }}</strong> |
+                Roll No: <strong style="color: #2c442a;">{{ student.Roll_no }}</strong>
+            </small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="javascript:history.back()">Back</a>
+    </div>
+
+    {% if progress_data %}
+        {% for item in progress_data %}
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <!-- Subject Card Header -->
+            <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+                <h5 class="mb-0 font-weight-bold">
+                    <i class="fas fa-book mr-2"></i> {{ item.subject.Name }}
+                </h5>
+                <span class="badge" style="background-color: #385636; color: #fff; font-size: 13px;">Code: {{ item.subject.Code }}</span>
+            </div>
+
+            <div class="card-body p-3 bg-white">
+                {% if item.exam_marks %}
+                <!-- Scrollable Table Container -->
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center align-middle mb-0">
+                        <thead>
+                            <tr style="background-color: #f4f8f4; color: #2c442a;">
+                                <th class="align-middle" style="min-width: 130px; background-color: #e4ede4; color: #2c442a;">Exam / Date</th>
+                                {% for exam in item.exam_marks %}
+                                <th class="text-nowrap px-4" style="min-width: 140px;">
+                                    <div class="font-weight-bold" style="color: #2c442a;">{{ exam.exam_name }}</div>
+                                    <small class="text-muted d-block">{{ exam.exam_date|date:"d-m-Y" }}</small>
+                                    <small class="badge text-white" style="background-color: #486E46;">Max: {{ exam.max_mark }}</small>
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-weight-bold align-middle" style="background-color: #f9fbf9; color: #2c442a;">Score</td>
+                                {% for exam in item.exam_marks %}
+                                <td class="align-middle font-weight-bold font-size-16">
+                                    {% if exam.score != '-' %}
+                                        <span style="color: #486E46; font-size: 1.1rem;">{{ exam.score }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0 py-2"><i class="fas fa-info-circle mr-1"></i> No exams or marks recorded for this subject yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="alert shadow-sm text-center" style="background-color: #f4f8f4; color: #2c442a; border: 1px solid #d4e2d4;">
+        No subjects or exam records found for your class.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

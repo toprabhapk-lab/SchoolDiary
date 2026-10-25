@@ -1,0 +1,147 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #dc3545;">
+        <div>
+            <h3 class="font-weight-bold mb-0 text-danger">Remove Teacher</h3>
+            <small class="text-muted">Delete faculty record and revoke account credentials</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Teacher Selection Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body bg-white p-3">
+            <form method="GET" action="{% url 'Remove_Teacher' %}" id="teacherSelectForm">
+                <div class="form-row align-items-center">
+                    <div class="col-md-12">
+                        <label for="teacher_id" class="font-weight-bold mb-1" style="color: #2c442a;">Select Teacher to Remove:</label>
+                        <select name="teacher_id" id="teacher_id" class="form-control" onchange="this.form.submit()" style="border-color: #d4e2d4;">
+                            <option value="">-- Choose Teacher --</option>
+                            {% for teacher in teachers %}
+                                <option value="{{ teacher.id }}" {% if selected_teacher and selected_teacher.id == teacher.id %}selected{% endif %}>
+                                    {{ teacher.Name }} ({{ teacher.Code }}) - {{ teacher.Designation }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_teacher %}
+
+        <!-- Class Teacher Restriction Alert -->
+        {% if linked_class %}
+            <div class="alert alert-danger shadow-sm mb-4" role="alert" style="border-radius: 8px;">
+                <h5 class="alert-heading font-weight-bold"><i class="fas fa-exclamation-triangle mr-2"></i> Removal Blocked</h5>
+                <p class="mb-1">
+                    This teacher cannot be removed because <strong>{{ selected_teacher.Name }}</strong> is currently assigned as the <strong>Class Teacher</strong> for:
+                </p>
+                <ul class="mb-2">
+                    <li><strong>Class:</strong> {{ linked_class.Class_no }} - Section {{ linked_class.Section }}</li>
+                </ul>
+                <p class="mb-0 text-dark small">
+                    <strong>Action Required:</strong> Please change or unassign the class teacher charge before removing this record.
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- Subject Warning Alert -->
+        {% if linked_subjects %}
+            <div class="alert alert-warning shadow-sm mb-4" role="alert" style="border-radius: 8px;">
+                <h5 class="alert-heading font-weight-bold"><i class="fas fa-exclamation-circle mr-2"></i> Subject Association Warning</h5>
+                <p class="mb-2">
+                    <strong>Warning:</strong> {{ selected_teacher.Name }} is assigned to the following subject(s). Please reassign these subjects after deletion:
+                </p>
+                <div class="table-responsive bg-white rounded border" style="border-color: #d4e2d4 !important;">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead style="background-color: #f4f8f4; color: #2c442a;">
+                            <tr>
+                                <th>Class</th>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in linked_subjects %}
+                                <tr>
+                                    <td>Class {{ subject.Class.Class_no }} - {{ subject.Class.Section }}</td>
+                                    <td><span class="badge text-white" style="background-color: #385636;">{{ subject.Code }}</span></td>
+                                    <td class="font-weight-bold" style="color: #2c442a;">{{ subject.Name }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Teacher Profile Card -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+                <i class="fas fa-id-card mr-2"></i> Teacher Profile Overview
+            </div>
+            <div class="card-body bg-white">
+                <div class="row">
+                    <div class="col-md-4 mb-3"><strong>Teacher Code:</strong> <div class="text-secondary">{{ selected_teacher.Code }}</div></div>
+                    <div class="col-md-4 mb-3"><strong>Full Name:</strong> <div class="text-secondary">{{ selected_teacher.Name }}</div></div>
+                    <div class="col-md-4 mb-3"><strong>Designation:</strong> <div class="text-secondary">{{ selected_teacher.Designation }}</div></div>
+
+                    <div class="col-md-4 mb-3"><strong>Mobile Number:</strong> <div class="text-secondary">{{ selected_teacher.MobileNumber }}</div></div>
+                    <div class="col-md-4 mb-3"><strong>Email Address:</strong> <div class="text-secondary">{{ selected_teacher.Email|default:"-" }}</div></div>
+                    <div class="col-md-4 mb-3"><strong>System Login ID:</strong> <div class="text-secondary"><span class="badge text-white" style="background-color: #385636;">T_{{ selected_teacher.Code }}</span></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mb-5 text-right">
+            {% if not linked_class %}
+                <form method="POST" action="{% url 'Remove_Teacher' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="teacher_id" value="{{ selected_teacher.id }}">
+                    <button type="submit" name="confirm_delete" value="1" class="btn btn-danger font-weight-bold px-4 py-2"
+                        onclick="return confirm('Are you sure you want to remove teacher {{ selected_teacher.Name }} (Code: {{ selected_teacher.Code }})?\n\nThis will also permanently delete their login account (T_{{ selected_teacher.Code }}).');">
+                        <i class="fas fa-trash-alt mr-1"></i> Confirm & Delete Teacher
+                    </button>
+                </form>
+            {% else %}
+                <button class="btn btn-secondary font-weight-bold px-4 py-2" disabled>
+                    <i class="fas fa-ban mr-1"></i> Removal Blocked
+                </button>
+            {% endif %}
+            <a class="btn btn-secondary px-4 py-2 ml-2" href="{% url 'admin_home' %}">Cancel</a>
+        </div>
+
+    {% elif not selected_teacher %}
+        <div class="card shadow-sm border-0 p-5 text-center" style="border-radius: 8px;">
+            <div class="text-muted">
+                <i class="fas fa-user-minus fa-3x mb-3" style="color: #d4e2d4;"></i>
+                <h5>Select a Teacher</h5>
+                <p class="small mb-0">Choose a teacher from the dropdown above to load details and verify removal prerequisites.</p>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

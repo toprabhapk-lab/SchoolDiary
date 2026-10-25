@@ -1,0 +1,166 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .report-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .report-header {
+        border-bottom: 2px solid #486E46;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .filter-btn {
+        background-color: #486E46;
+        color: #fff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .filter-btn:hover {
+        background-color: #385636;
+        color: #fff;
+    }
+
+    .table-custom-header {
+        background-color: #486E46;
+        color: #ffffff;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-bottom: 30px;
+    }
+
+    .attendance-table th, .attendance-table td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 13px;
+        padding: 6px 4px;
+    }
+
+    .holiday-cell {
+        background-color: #f4f8f4;
+        color: #486E46;
+        font-weight: 600;
+        font-size: 11px;
+    }
+
+    .tick-mark {
+        color: #28a745;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .cross-mark {
+        color: #dc3545;
+        font-weight: bold;
+        font-size: 16px;
+    }
+</style>
+
+<div class="report-card">
+    <a class="badge badge-secondary float-md-right" style="font-size: 0.9rem; padding: 8px 12px;" href="{% url 'TeacherHome' %}">&lt;&lt; back</a>
+
+    <div class="report-header text-center">
+        <h2><strong>Student Attendance Report</strong></h2>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="GET" action="" class="row justify-content-center mb-4">
+        <div class="col-md-3 mb-2">
+            <label for="class_id" class="font-weight-bold">Class:</label>
+            <select name="class_id" id="class_id" class="form-control" required>
+                <option value="">-- Select Class --</option>
+                {% for cls in classes %}
+                    <option value="{{ cls.id }}" {% if cls.id == selected_class_id %}selected{% endif %}>
+                        {{ cls.Class_no }} - {{ cls.Section }} (Div: {{ cls.Division|default:"N/A" }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label for="month" class="font-weight-bold">Month:</label>
+            <select name="month" id="month" class="form-control" required>
+                {% for m_num, m_name in months %}
+                    <option value="{{ m_num }}" {% if m_num == selected_month %}selected{% endif %}>
+                        {{ m_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label for="year" class="font-weight-bold">Year:</label>
+            <select name="year" id="year" class="form-control" required>
+                {% for y in years %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+                        {{ y }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2 mb-2 d-flex align-items-end">
+            <button type="submit" class="btn filter-btn btn-block">Generate Report</button>
+        </div>
+    </form>
+
+    {% if selected_class %}
+        <hr class="my-4">
+
+        <!-- Table 1: Monthly Attendance Matrix -->
+        <h4 class="mb-3 text-secondary">
+            Monthly Attendance Grid: <strong>Class {{ selected_class.Class_no }}-{{ selected_class.Section }} ({{ selected_class.Division }})</strong>
+        </h4>
+
+        <div class="table-container">
+            <table class="table table-bordered table-hover attendance-table">
+                <thead>
+                    <tr class="table-custom-header">
+                        <th>Roll No</th>
+                        <th style="min-width: 150px; text-align: left;">Student Name</th>
+                        {% for day_info in days_in_month %}
+                            <th>{{ day_info.day }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report_data %}
+                        <tr>
+                            <td>{{ row.student.Roll_no }}</td>
+                            <td style="text-align: left;"><strong>{{ row.student.Name }}</strong></td>
+                            {% for att in row.attendance %}
+                                {% if att.status == 'Holiday' %}
+                                    <td class="holiday-cell">Holiday</td>
+                                {% elif att.status == 'Absent' %}
+                                    <td><span class="cross-mark">&#10008;</span></td>
+                                {% else %}
+                                    <td><span class="tick-mark">&#10004;</span></td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="{{ days_in_month|length|add:2 }}" class="text-center">No students found in this class.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Remove Student</h3>
+            <small class="text-muted">Select class and student to remove record</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+            <i class="fas fa-user-minus mr-2"></i> Student Removal Form
+        </div>
+
+        <div class="card-body bg-white p-4">
+            <form method="POST" action="{% url 'remove_student' %}" id="removeStudentForm">
+                {% csrf_token %}
+
+                <!-- Selection Block -->
+                <div class="p-3 rounded mb-4" style="background-color: #f4f8f4; border: 1px solid #d4e2d4;">
+                    <div class="row">
+                        <!-- Class Selection Dropdown -->
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="classSelect" class="font-weight-bold" style="color: #2c442a;">Select Class *</label>
+                            <select class="form-control" id="classSelect" name="class_id" required style="border-color: #d4e2d4;">
+                                <option value="">-- Choose Class --</option>
+                                {% for c in classes %}
+                                    <option value="{{ c.id }}">{{ c.Class_no }} - {{ c.Section }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Student Selection Dropdown -->
+                        <div class="col-md-6">
+                            <label for="studentSelect" class="font-weight-bold" style="color: #2c442a;">Select Student *</label>
+                            <select class="form-control" id="studentSelect" name="student_id" required disabled style="border-color: #d4e2d4;">
+                                <option value="">-- Choose Student --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning Alert Box -->
+                <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4" role="alert" style="background-color: #fff8e6; border-left: 4px solid #f3be62 !important; color: #8a5a00;">
+                    <i class="fas fa-exclamation-triangle fa-lg mr-3" style="color: #f3be62;"></i>
+                    <div class="small">
+                        <strong>Warning:</strong> Removing a student will permanently delete their student record, parent details, and associated history from the school system, and recalculate roll numbers for the remaining class.
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn text-white font-weight-bold px-4" id="deleteBtn" disabled style="background-color: #dc3545; border-color: #dc3545;">
+                        <i class="fas fa-trash-alt mr-2"></i>Remove Student
+                    </button>
+                    <a class="btn btn-outline-secondary ml-2 font-weight-bold" href="{% url 'AdminPrincipalFrame' %}">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<!-- AJAX and Dynamic Dropdown Script -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#classSelect').change(function() {
+      var classId = $(this).val();
+      var $studentSelect = $('#studentSelect');
+      var $deleteBtn = $('#deleteBtn');
+
+      $studentSelect.empty().append('<option value="">-- Choose Student --</option>');
+      $studentSelect.prop('disabled', true);
+      $deleteBtn.prop('disabled', true);
+
+      if (classId) {
+        $.ajax({
+          url: "{% url 'get_students_by_class' %}",
+          data: { 'class_id': classId },
+          dataType: 'json',
+          success: function(data) {
+            if (data.length > 0) {
+              $.each(data, function(index, student) {
+                $studentSelect.append(
+                  '<option value="' + student.id + '">' +
+                    student.Name + ' (Adm No: ' + student.Admission_no + ', Roll: ' + student.Roll_no + ')' +
+                  '</option>'
+                );
+              });
+              $studentSelect.prop('disabled', false);
+            } else {
+              $studentSelect.append('<option value="">No students found in this class</option>');
+            }
+          }
+        });
+      }
+    });
+
+    $('#studentSelect').change(function() {
+      if ($(this).val()) {
+        $('#deleteBtn').prop('disabled', false);
+      } else {
+        $('#deleteBtn').prop('disabled', true);
+      }
+    });
+
+    $('#deleteBtn').click(function() {
+      var selectedStudentName = $('#studentSelect option:selected').text();
+      var confirmed = confirm("Are you sure you want to remove the student:\n\n" + selectedStudentName + "\n\nThis will permanently delete student, parent, and related records, and recalculate roll numbers for the class.");
+      if (confirmed) {
+        $('#removeStudentForm').submit();
+      }
+    });
+  });
+</script>
+{% endblock %}

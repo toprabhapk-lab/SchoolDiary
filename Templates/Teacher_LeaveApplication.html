@@ -1,0 +1,222 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid my-4 px-md-4">
+
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+    <div>
+      <h3 class="font-weight-bold mb-0" style="color: #2c442a;">
+        Leave Applications & Attendance Report
+        {% if selected_class %}
+          <small class="text-muted font-weight-normal">(Class: {{ selected_class.Section }} - {{ selected_class.Class_no }}-{{ selected_class.Division }})</small>
+        {% endif %}
+      </h3>
+    </div>
+    <a class="btn btn-sm text-white font-weight-bold" style="background-color: #385636; border-color: #385636;" href="{% url 'TeacherHome' %}">
+      <i class="fas fa-arrow-left mr-1"></i> Back
+    </a>
+  </div>
+
+  <!-- Pending Leave Applications Card -->
+  <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+    <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+      <span><i class="fas fa-clock mr-2"></i> Pending Leave Applications</span>
+      <span class="badge badge-light font-weight-normal">{{ pending_leaves|length }} Request(s)</span>
+    </div>
+    <div class="card-body bg-white p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center mb-0">
+          <thead>
+            <tr style="background-color: #f4f8f4; color: #2c442a;">
+              <th class="border-top-0">Roll No</th>
+              <th class="border-top-0 text-left">Student Name</th>
+              <th class="border-top-0">Applied Date</th>
+              <th class="border-top-0">Absent Date</th>
+              <th class="border-top-0 text-left" style="width: 30%;">Reason</th>
+              <th class="border-top-0" style="width: 180px;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for leave in pending_leaves %}
+              <tr>
+                <td><span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">{{ leave.Student.Roll_no }}</span></td>
+                <td class="text-left font-weight-bold" style="color: #2c442a;">{{ leave.Student.Name }}</td>
+                <td class="text-secondary"><i class="far fa-calendar-alt mr-1"></i> {{ leave.ApplicationDate|date:"d M Y" }}</td>
+                <td class="text-secondary"><i class="far fa-calendar-check mr-1"></i> {{ leave.AbsentDate|date:"d M Y" }}</td>
+                <td class="text-left text-muted small" style="white-space: pre-wrap;">{{ leave.Reason }}</td>
+                <td>
+                  <form method="POST" action="?month={{ selected_month }}&year={{ selected_year }}" class="d-inline-flex">
+                    {% csrf_token %}
+                    <input type="hidden" name="leave_id" value="{{ leave.id }}">
+                    <button type="submit" name="action" value="approve" class="btn btn-sm btn-success mr-1 font-weight-bold" title="Approve">
+                      <i class="fas fa-check mr-1"></i> Approve
+                    </button>
+                    <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger font-weight-bold" title="Reject">
+                      <i class="fas fa-times mr-1"></i> Reject
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  <i class="fas fa-check-circle text-success mr-1"></i> No pending leave applications for this class.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Selector Card -->
+  <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+    <div class="card-body bg-white py-3">
+      <form method="GET" action="" class="form-row align-items-end justify-content-center">
+        <div class="col-md-4 col-sm-6 mb-2 mb-md-0">
+          <label for="month" class="font-weight-bold" style="color: #2c442a;">Month:</label>
+          <select name="month" id="month" class="form-control" required>
+            {% for m_num, m_name in months %}
+              <option value="{{ m_num }}" {% if m_num == selected_month %}selected{% endif %}>
+                {{ m_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-2 mb-md-0">
+          <label for="year" class="font-weight-bold" style="color: #2c442a;">Year:</label>
+          <select name="year" id="year" class="form-control" required>
+            {% for y in years %}
+              <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+                {{ y }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+          <button type="submit" class="btn text-white btn-block font-weight-bold" style="background-color: #486E46; border-color: #486E46;">
+            <i class="fas fa-filter mr-1"></i> Generate Report
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if selected_class %}
+    <!-- Absence & Leave Verification Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+      <div class="card-header font-weight-bold" style="background-color: #e4ede4; color: #2c442a;">
+        <i class="fas fa-user-times mr-2" style="color: #486E46;"></i> Absence Details & Leave Verification
+      </div>
+      <div class="card-body bg-white p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle text-center mb-0">
+            <thead>
+              <tr style="background-color: #f4f8f4; color: #2c442a;">
+                <th class="border-top-0">Roll No</th>
+                <th class="border-top-0 text-left">Student Name</th>
+                <th class="border-top-0">Absent Date</th>
+                <th class="border-top-0">Parent Verified</th>
+                <th class="border-top-0">Leave App Submitted</th>
+                <th class="border-top-0">Approval Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for detail in second_table_data %}
+                <tr>
+                  <td><span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">{{ detail.roll_no }}</span></td>
+                  <td class="text-left font-weight-bold" style="color: #2c442a;">{{ detail.name }}</td>
+                  <td class="text-secondary"><i class="far fa-calendar-alt mr-1"></i> {{ detail.absent_date|date:"d M Y" }}</td>
+                  <td>
+                    {% if detail.parent_verified %}
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;"><i class="fas fa-check mr-1"></i> Yes</span>
+                    {% else %}
+                      <span class="badge px-2 py-1" style="background-color: #fbe3e3; color: #9c2a2a;"><i class="fas fa-times mr-1"></i> No</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if detail.has_leave_app %}
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;"><i class="fas fa-check mr-1"></i> Yes</span>
+                    {% else %}
+                      <span class="badge badge-light text-muted border px-2 py-1"><i class="fas fa-minus mr-1"></i> No</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if detail.leave_status == 'Approved' %}
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;"><i class="fas fa-check-circle mr-1"></i> Approved</span>
+                    {% elif detail.leave_status == 'Pending' %}
+                      <span class="badge px-2 py-1" style="background-color: #fce8bd; color: #734d00;"><i class="fas fa-hourglass-half mr-1"></i> Pending</span>
+                    {% elif detail.leave_status == 'Rejected' %}
+                      <span class="badge px-2 py-1" style="background-color: #fbe3e3; color: #9c2a2a;"><i class="fas fa-times-circle mr-1"></i> Rejected</span>
+                    {% else %}
+                      <span class="badge badge-light text-muted border px-2 py-1">N/A</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle mr-1"></i> No absent records found for the selected month.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Attendance Matrix Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+      <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #51714f;">
+        <span><i class="fas fa-th-list mr-2"></i> Monthly Attendance Grid</span>
+        <span class="badge badge-light font-weight-normal"><i class="fas fa-info-circle mr-1"></i> Visual Matrix</span>
+      </div>
+      <div class="card-body bg-white p-0">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover text-center align-middle mb-0" style="font-size: 13px;">
+            <thead>
+              <tr style="background-color: #f4f8f4; color: #2c442a;">
+                <th class="border-top-0">Roll</th>
+                <th class="border-top-0 text-left" style="min-width: 160px;">Student Name</th>
+                {% for day_info in days_in_month %}
+                  <th class="border-top-0 px-1">{{ day_info.day }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in report_data %}
+                <tr>
+                  <td><span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">{{ row.student.Roll_no }}</span></td>
+                  <td class="text-left font-weight-bold text-nowrap" style="color: #2c442a;">{{ row.student.Name }}</td>
+                  {% for att in row.attendance %}
+                    {% if att.status == 'Holiday' %}
+                      <td class="p-1 text-muted font-weight-bold" style="background-color: #f8faf0; font-size: 11px;">H</td>
+                    {% elif att.status == 'Absent' %}
+                      <td class="p-1"><i class="fas fa-times text-danger font-weight-bold"></i></td>
+                    {% else %}
+                      <td class="p-1"><i class="fas fa-check text-success font-weight-bold"></i></td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="{{ days_in_month|length|add:2 }}" class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle mr-1"></i> No students found in this class.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .calendar-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin: 40px auto;
+    max-width: 650px;
+    border-top: 5px solid #486E46;
+  }
+
+  .calendar-card h3 {
+    color: #333333;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    color: #444444;
+  }
+
+  .form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 10px 14px;
+  }
+
+  .form-control:focus {
+    border-color: #486E46;
+    box-shadow: 0 0 0 0.2rem rgba(72, 110, 70, 0.25);
+  }
+
+  .custom-switch-wrapper {
+    background-color: #f8f9fa;
+    padding: 12px 18px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+  }
+
+  .btn-custom-update {
+    background-color: #486E46;
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-custom-update:hover {
+    background-color: #385636;
+    color: #ffffff;
+  }
+
+  .btn-custom-delete {
+    background-color: #dc3545;
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-custom-delete:hover {
+    background-color: #bd2130;
+    color: #ffffff;
+  }
+
+  .btn-custom-cancel {
+    background-color: #6c757d;
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-custom-cancel:hover {
+    background-color: #5a6268;
+    color: #ffffff;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 25px;
+    flex-wrap: wrap;
+  }
+</style>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="calendar-card">
+      <h3 class="text-center">Academic Calendar Entry</h3>
+
+      <!-- Alert Messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST" action="">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="CalenderDate">Select Date</label>
+            <input
+                type="date"
+                id="CalenderDate"
+                name="CalenderDate"
+                class="form-control"
+                value="{% if calendar_entry %}{{ calendar_entry.CalenderDate|date:'Y-m-d' }}{% elif selected_date %}{{ selected_date }}{% endif %}"
+                required
+                onchange="this.form.method='GET'; this.form.submit();"
+            >
+            <small class="form-text text-muted">Selecting a date will auto-load existing entry details if present.</small>
+        </div>
+
+        <div class="form-group">
+          <label>Day Status</label>
+          <div class="custom-switch-wrapper">
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="Working_day"
+                name="Working_day"
+                {% if calendar_entry %}
+                  {% if calendar_entry.Working_day %}checked{% endif %}
+                {% else %}
+                  checked
+                {% endif %}
+              >
+              <label class="custom-control-label" for="Working_day">Mark as Working Day</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="Description">Description / Note</label>
+          <textarea
+            id="Description"
+            name="Description"
+            class="form-control"
+            rows="3"
+            maxlength="100"
+            placeholder="Enter holiday reason, event, or special notes (max 100 characters)"
+          >{% if calendar_entry %}{{ calendar_entry.Description|default_if_none:'' }}{% endif %}</textarea>
+        </div>
+
+        <div class="action-buttons">
+          <button type="submit" name="action" value="update" class="btn btn-custom-update">
+            Update Entry
+          </button>
+          <button 
+            type="submit" 
+            name="action" 
+            value="delete" 
+            class="btn btn-custom-delete" 
+            onclick="return confirm('Are you sure you want to remove this entry?');"
+            {% if not calendar_entry %}disabled{% endif %}
+          >
+            Remove Entry
+          </button>
+          <button type="submit" name="action" value="cancel" class="btn btn-custom-cancel" formnovalidate>
+            Cancel / Back
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

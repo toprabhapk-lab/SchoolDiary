@@ -1,0 +1,176 @@
+{% extends 'ParentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .leave-card {
+    border: none;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    max-width: 680px;
+    margin: 30px auto;
+  }
+
+  .leave-header {
+    background-color: #486E46; /* Matching ParentFrame Primary Theme */
+    color: #ffffff;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 4px solid #385636;
+  }
+
+  .leave-title {
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 0;
+  }
+
+  .btn-back {
+    background-color: #385636;
+    color: #ffffff !important;
+    font-weight: 600;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 18px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-back:hover {
+    background-color: #2c442a;
+    color: #ffffff !important;
+    text-decoration: none;
+  }
+
+  .student-info-banner {
+    background-color: #f4f8f4;
+    border-left: 4px solid #486E46;
+    padding: 12px 18px;
+    border-radius: 6px;
+    margin-bottom: 22px;
+  }
+
+  .student-info-banner span {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 0.92rem;
+    color: #2c442a;
+    font-weight: 600;
+  }
+
+  .form-group label {
+    font-weight: 700;
+    color: #2c442a;
+    font-size: 0.92rem;
+    margin-bottom: 6px;
+  }
+
+  .form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+
+  .form-control:focus {
+    border-color: #486E46;
+    box-shadow: 0 0 0 0.2rem rgba(72, 110, 70, 0.25);
+  }
+
+  .btn-submit-leave {
+    background-color: #486E46;
+    color: #ffffff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .btn-submit-leave:hover {
+    background-color: #385636;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(56, 86, 54, 0.3);
+  }
+</style>
+
+<div class="container my-4">
+  <div class="card leave-card">
+    <!-- Header Section -->
+    <div class="leave-header d-flex justify-content-between align-items-center">
+      <div>
+        <h3 class="leave-title m-0">
+          <i class="fas fa-file-signature mr-2"></i>Apply for Leave
+        </h3>
+        <p class="m-0 text-white-50 small mt-1">Submit an absence leave request for your child</p>
+      </div>
+      <a class="btn btn-back shadow-sm" href="{% url 'ParentHome' %}">
+        <i class="fas fa-arrow-left mr-1"></i> Back
+      </a>
+    </div>
+
+    <div class="card-body p-4">
+      <!-- Alert Messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Student Banner -->
+      <div class="student-info-banner d-flex flex-wrap align-items-center">
+        <span><i class="fas fa-user-graduate mr-1" style="color: #486E46;"></i> <strong>Student:</strong> {{ student.Name }}</span>
+        <span><i class="fas fa-id-card-alt mr-1" style="color: #486E46;"></i> <strong>Adm No:</strong> {{ student.Admission_no }}</span>
+        {% if student.Class %}
+          <span><i class="fas fa-chalkboard mr-1" style="color: #486E46;"></i> <strong>Class:</strong> {{ student.Class.Class_no }}-{{ student.Class.Section }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Leave Application Form -->
+      <form method="POST" action="{% url 'Parent_LeaveApplication' %}">
+        {% csrf_token %}
+
+        <div class="form-group mb-3">
+          <label for="absent_date">
+            <i class="fas fa-calendar-day mr-1" style="color: #486E46;"></i> Absent Date <span class="text-danger">*</span>
+          </label>
+          <input
+            type="date"
+            class="form-control"
+            id="absent_date"
+            name="absent_date"
+            value="{{ absent_date|default:'' }}"
+            required>
+        </div>
+
+        <div class="form-group mb-4">
+          <label for="reason">
+            <i class="fas fa-comment-alt mr-1" style="color: #486E46;"></i> Reason for Absence <span class="text-danger">*</span>
+          </label>
+          <textarea
+            class="form-control"
+            id="reason"
+            name="reason"
+            rows="4"
+            maxlength="100"
+            placeholder="Specify reason (max 100 characters)..."
+            required>{{ reason|default:'' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-submit-leave shadow-sm">
+          <i class="fas fa-paper-plane mr-2"></i> Submit Application
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

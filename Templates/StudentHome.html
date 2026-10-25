@@ -1,0 +1,336 @@
+{% extends 'StudentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Hero Welcome Banner */
+  .student-welcome-hero {
+    background: linear-gradient(135deg, #608e5c 0%, #3e833b 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 22px 28px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .student-welcome-hero h2 {
+    font-weight: 700;
+    font-size: 1.65rem;
+    margin-bottom: 4px;
+    color: #ffffff;
+  }
+
+  .student-welcome-hero p {
+    font-size: 0.92rem;
+    margin: 0;
+    opacity: 0.92;
+    color: #ffffff;
+  }
+
+  /* Profile Avatar Styling */
+  .student-avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #b6c58b;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Compact Integrated Profile Card */
+  .compact-profile-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    border: 1px solid #eef0f2;
+    overflow: hidden;
+  }
+
+  .compact-profile-card .card-header-custom {
+    background-color: #f4f7e8;
+    color: #385636;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-bottom: 1px solid #e3ebd0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+  }
+
+  .compact-profile-card .card-body-custom {
+    padding: 12px 14px;
+  }
+
+  /* Compact Info Grid Layout */
+  .profile-grid-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed #f0f2ea;
+  }
+
+  .profile-grid-item:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.8rem;
+  }
+
+  .info-value {
+    font-weight: 700;
+    color: #2f331d;
+    font-size: 0.84rem;
+  }
+
+  /* Change Password Link Button */
+  .btn-change-pwd {
+    background-color: #f4f7e8;
+    color: #385636;
+    border: 1px solid #b6c58b;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
+
+  .btn-change-pwd:hover {
+    background-color: #486E46;
+    color: #ffffff;
+    border-color: #486E46;
+  }
+
+  /* Section Titles */
+  .section-header-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2f331d;
+    margin-bottom: 16px;
+    padding-left: 10px;
+    border-left: 4px solid #486E46;
+  }
+
+  /* Quick Access Cards */
+  .quick-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eef0f2;
+    text-decoration: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+    height: calc(100% - 18px);
+  }
+
+  .quick-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-color: #486E46;
+  }
+
+  .quick-card .quick-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background-color: #486E46;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+  }
+
+  .quick-card .quick-info h6 {
+    margin: 0 0 3px 0;
+    font-weight: 700;
+    color: #2f331d;
+    font-size: 0.9rem;
+  }
+
+  .quick-card .quick-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    line-height: 1.2;
+  }
+</style>
+
+<div class="container-fluid px-0">
+
+  <!-- Welcome Hero Banner -->
+  <div class="student-welcome-hero">
+    <div class="row align-items-center">
+      <div class="col-md-2 text-center text-md-left mb-2 mb-md-0">
+        {% if student.Gender == 'Male' %}
+          <img src="{% static 'images/boy.png' %}" alt="Student Avatar" class="student-avatar-img">
+        {% else %}
+          <img src="{% static 'images/girl.png' %}" alt="Student Avatar" class="student-avatar-img">
+        {% endif %}
+      </div>
+      <div class="col-md-7">
+        <h2>Welcome, {{ student.Name|default:request.user.username }}!</h2>
+        <p>SchoolDiary Student Portal. Access your schedule, track academic progress, and stay updated.</p>
+      </div>
+      <div class="col-md-3 text-md-right mt-2 mt-md-0">
+        <span class="badge badge-light p-2 font-weight-bold" style="color: #385636; font-size: 0.88rem;">
+          <i class="fas fa-id-card-alt mr-1"></i> Adm No: {{ student.Admission_no|default:"--" }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout: Profile (1/4 Width - col-lg-3) | Quick Access (3/4 Width - col-lg-9) -->
+  <div class="row mb-4">
+
+    <!-- LEFT COLUMN: Student Overview & Credentials -->
+    <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
+      <div class="compact-profile-card">
+        <div class="card-header-custom">
+          <span><i class="fas fa-user-graduate mr-1" style="color: #486E46;"></i> Profile </span>
+          <span class="badge px-2 py-1" style="background-color: #d2dc9b; color: #385636;">Class {{ student.Class.Section }}-{{ student.Class.Class_no }}-{{ student.Class.Division }}</span>
+        </div>
+        <div class="card-body-custom">
+          <!-- Change Password Button Area -->
+          <div class="text-center mb-2 pb-2" style="border-bottom: 3px dashed #b6c58b;">
+            <span class="info-label"><i class="fas fa-user-circle mr-1 text-muted"></i> Login ID:</span>
+            <span class="info-value">{{ student.Login.username|default:request.user.username }}</span>
+            <div class="mt-2">
+              <a href="{% url 'change_password' %}" class="btn-change-pwd shadow-sm">
+                  <i class="fas fa-key mr-1"></i> Change Password
+              </a>
+            </div>
+          </div>
+          <div class="profile-grid-item">
+            <span class="info-label"><i class="fas fa-user mr-1 text-muted"></i> Full Name:</span>
+            <span class="info-value">{{ student.Name|default:"--" }}</span>
+          </div>
+          <div class="profile-grid-item">
+            <span class="info-label"><i class="fas fa-list-ol mr-1 text-muted"></i> Roll No:</span>
+            <span class="info-value">{{ student.Roll_no|default:"--" }}</span>
+          </div>
+        </div>
+        <div class="card-header-custom border-top">
+            <span><i class="fas fa-chalkboard-teacher mr-2" style="color: #486E46;"></i> Class Teacher</span>
+        </div>
+        <div class="card-body-custom">
+          <div class="profile-grid-item justify-content-end">
+            <span class="info-value"><i class="fas fa-user-tie mr-1 text-muted"></i> {{ student.Class.Class_teacher.Name|default:"Not Assigned" }}</span>
+          </div>
+          <div class="profile-grid-item justify-content-end">
+            <span class="info-value"><i class="fas fa-phone-alt mr-1 text-muted"></i> {{ student.Class.Class_teacher.MobileNumber|default:"--" }}</span>
+          </div>
+          <div class="profile-grid-item justify-content-end">
+            <span class="info-value" style="font-size: 0.78rem;"><i class="fas fa-envelope mr-1 text-muted"></i> {{ student.Class.Class_teacher.Email|default:"--" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Quick Access Icons -->
+    <div class="col-lg-9 col-md-12">
+      <h5 class="section-header-title">Quick Access — Student's Corner</h5>
+      <div class="row">
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'Student_Notice' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-bullhorn"></i></div>
+            <div class="quick-info">
+              <h6>School Notices</h6>
+              <p>Read latest announcements.[cite: 18]</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'Student_TimeTable' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-table"></i></div>
+            <div class="quick-info">
+              <h6>Time Table</h6>
+              <p>View daily schedule.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'Student_PersonalData' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-id-card"></i></div>
+            <div class="quick-info">
+              <h6>Personal Data</h6>
+              <p>Check complete profile.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'Student_Progress' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-poll-h"></i></div>
+            <div class="quick-info">
+              <h6>Progress Report</h6>
+              <p>View marks & grades.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'student_academic_calendar' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="quick-info">
+              <h6>Academic Calendar</h6>
+              <p>Check holidays & events.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'student_homework' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-pen-fancy"></i></div>
+            <div class="quick-info">
+              <h6>Homework</h6>
+              <p>Review assigned tasks.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'student_attendance' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-user-check"></i></div>
+            <div class="quick-info">
+              <h6>Attendance</h6>
+              <p>Monitor daily attendance.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <a href="{% url 'student_acknowledgement' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-check-double"></i></div>
+            <div class="quick-info">
+              <h6>Acknowledgements</h6>
+              <p>View credit points & remarks.</p>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+    <div>
+      <h3 class="font-weight-bold mb-0" style="color: #2c442a;">
+        Late Arrival Record
+        {% if Selected_class %}
+          <small class="text-muted font-weight-normal">(Class: {{ Selected_class.Class_no }}-{{ Selected_class.Section }})</small>
+        {% endif %}
+      </h3>
+    </div>
+    <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'TeacherHome' %}">
+      <i class="fas fa-arrow-left mr-1"></i> Back
+    </a>
+  </div>
+
+  <!-- Error / Alert Message -->
+  {% if error %}
+    <div class="alert alert-warning shadow-sm border-0 mb-4" role="alert" style="background-color: #fff8e6; border-left: 4px solid #f3be62 !important; color: #8a5a00;">
+      <i class="fas fa-exclamation-triangle mr-2"></i> {{ error }}
+    </div>
+  {% endif %}
+
+  <!-- Date Selector Card -->
+  <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+    <div class="card-body bg-white">
+      <form method="get" class="form-inline">
+        <label for="date" class="font-weight-bold mr-2" style="color: #2c442a;">Select Date:</label>
+        <input type="date" id="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="form-control" onchange="this.form.submit()"/>
+      </form>
+    </div>
+  </div>
+
+  {% if not is_working_day %}
+    <!-- School Holiday Alert -->
+    <div class="alert border-0 shadow-sm" role="alert" style="background-color: #f8faf0; border-left: 4px solid #486E46 !important; color: #2c442a;">
+      <i class="fas fa-umbrella-beach mr-2" style="color: #f3be62;"></i> <strong>School Holiday:</strong> Late arrival tracking is not required for this date.
+    </div>
+  {% else %}
+    <!-- Late Arrival Table Form Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+      <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+        <span><i class="fas fa-user-clock mr-2"></i> Late Arrival Sheet: <strong>{{ selected_date|date:'d M, Y' }}</strong></span>
+        <span class="badge badge-light font-weight-normal"><i class="fas fa-clock mr-1"></i> Mark late students & enter arrival time</span>
+      </div>
+      <div class="card-body bg-white p-0">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="late_arrival_date" value="{{ selected_date|date:'Y-m-d' }}" />
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr style="background-color: #f4f8f4; color: #2c442a;">
+                  <th class="border-top-0">Roll No</th>
+                  <th class="border-top-0">Student Name</th>
+                  <th class="border-top-0 text-center" style="width: 160px;">Status (Late)</th>
+                  <th class="border-top-0 text-center" style="width: 200px;">Arrival Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for student in students %}
+                  <tr>
+                    <td>
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">{{ student.Roll_no }}</span>
+                    </td>
+                    <td class="font-weight-bold" style="color: #2c442a;">{{ student.Name }}</td>
+                    <td class="text-center">
+                      <div class="custom-control custom-checkbox d-inline-block">
+                        <input
+                          type="checkbox"
+                          class="custom-control-input"
+                          id="late_{{ student.id }}"
+                          name="late_arrival"
+                          value="{{ student.id }}"
+                          {% if student.id in late_arrival_ids %}checked{% endif %}
+                        />
+                        <label class="custom-control-label font-weight-bold cursor-pointer" for="late_{{ student.id }}" style="color: #d97706 !important;">
+                          Mark Late
+                        </label>
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <input
+                        type="time"
+                        name="late_arrival_time_{{ student.id }}"
+                        class="form-control form-control-sm mx-auto"
+                        style="max-width: 140px;"
+                        value="{% for sid, arrival_time in late_arrival_times.items %}{% if sid == student.id %}{{ arrival_time|time:'H:i' }}{% endif %}{% endfor %}"
+                      />
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                      <i class="fas fa-info-circle mr-1"></i> No students found for this class.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-3 text-right border-top" style="background-color: #fcfdfe;">
+            <a class="btn btn-light border mr-2 font-weight-bold text-secondary" href="{% url 'TeacherHome' %}">
+              <i class="fas fa-times mr-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn text-white font-weight-bold px-4" style="background-color: #486E46; border-color: #486E46;">
+              <i class="fas fa-check-circle mr-1"></i> Save Records
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

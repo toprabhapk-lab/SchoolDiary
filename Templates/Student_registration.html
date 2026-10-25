@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+{%extends 'AdminPrincipalFrame.html'%}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student_registration</title>
+</head>
+<body>
+{%block content%}
+<br>
+<br>
+<h2>Manage Student</h2>
+
+<form method="post">
+  {% csrf_token %}
+  <table border="1" width="200">
+    {{ form.as_table}}
+  </table>
+  <input type="submit" value="Insert">
+</form>
+
+
+<table border="2" class="table table-striped">
+    <tr>
+        <td>
+          Login id
+        </td>
+        <td>
+          Admission_no
+        </td>
+	<td>
+          Adm_date
+        </td>
+	<td>
+          Class
+        </td>
+        <td >
+            Roll_no
+        </td>
+        <td >
+            Name
+        </td>
+
+	    <td>
+          Gender
+        </td>
+        <td >
+            DOB
+        </td>
+        <td >
+            Blood_group
+        </td>
+
+	<td>
+          MobileNumber
+        </td>
+        <td >
+            Address
+        </td>
+        <td >
+            Category
+        </td><td>
+          Caste
+        </td>
+        <td >
+            Religion
+        </td>
+        <td >
+            APL_BPL
+        </td>
+	    <td>
+          Aadhar
+        </td>
+        <td >
+            Local_body
+        </td>
+        <td >
+            Bank_ac
+        </td>
+
+	    <td>
+          Bank_name
+        </td>
+        <td >
+            IFSC
+        </td>
+
+    </tr>
+    {% for obj in dataset %}
+    <tr>
+         <td>
+           {{obj.Login}}
+        </td>
+        <td>
+           {{obj.Admission_no}}
+        </td>
+	    <td>
+           {{obj.Adm_date}}
+        </td>
+	    <td>
+           {{obj.Class}}
+        </td>
+        <td>
+           {{obj.Roll_no}}
+        </td>
+        <td>
+           {{obj.Name}}
+        </td>
+        <td>
+           {{obj.Gender}}
+        </td>
+	    <td>
+           {{obj.DOB}}
+        </td>
+	    <td>
+           {{obj.Blood_group}}
+        </td>
+        <td>
+           {{obj.MobileNumber}}
+        </td>
+        <td>
+           {{obj.Address}}
+        </td>
+        <td>
+           {{obj.Category}}
+        </td>
+	    <td>
+           {{obj.Caste}}
+        </td>
+	    <td>
+           {{obj.Religion}}
+        </td>
+        <td>
+           {{obj.APL_BPL}}
+        </td>
+        <td>
+           {{obj.Aadhar}}
+        </td>
+        <td>
+           {{obj.Local_body}}
+
+        </td>
+
+	    <td>
+           {{obj.Bank_ac}}
+        </td>
+	    <td>
+           {{obj.Bank_name}}
+        </td>
+        <td>
+           {{obj.IFSC}}
+        </td>
+        <td>
+            <a href="{% url 'Student_Edit' obj.id %}">Edit </a>
+        </td>
+           <td>
+              <a href="{% url 'Student_Delete' obj.id %}">Delete </a>
+        </td>
+
+    {% endfor %}
+</table>
+{%endblock%}
+</body>
+</html>

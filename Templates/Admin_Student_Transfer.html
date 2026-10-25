@@ -1,0 +1,194 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Student Class Transfer</h3>
+            <small class="text-muted">Select source class and transfer students to target classes</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Source Class Selection Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body bg-white p-3">
+            <form method="GET" action="{% url 'Admin_Student_Transfer' %}" id="sourceClassForm">
+                <div class="form-row align-items-center">
+                    <div class="col-md-12">
+                        <label for="source_class_id" class="font-weight-bold mb-1" style="color: #2c442a;">Select Source Class:</label>
+                        <select name="source_class_id" id="source_class_id" class="form-control" onchange="this.form.submit()" style="border-color: #d4e2d4;">
+                            <option value="">-- Select Source Class --</option>
+                            {% for cls in classes %}
+                                <option value="{{ cls.id }}" {% if selected_source_class and selected_source_class.id == cls.id %}selected{% endif %}>
+                                    Class {{ cls.Class_no }} - {{ cls.Section }} (Division: {{ cls.Division|default:"N/A" }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_source_class %}
+        <form method="POST" action="{% url 'Admin_Student_Transfer' %}" id="transferForm">
+            {% csrf_token %}
+            <input type="hidden" name="source_class_id" value="{{ selected_source_class.id }}">
+
+            <!-- Students List Card -->
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+                <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+                    <span><i class="fas fa-exchange-alt mr-2"></i> Class Students Roster</span>
+                    <span class="badge badge-light font-weight-bold" style="color: #2c442a;">
+                        Source: Class {{ selected_source_class.Class_no }} - {{ selected_source_class.Section }}
+                    </span>
+                </div>
+
+                <div class="card-body bg-white p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-center">
+                            <thead style="background-color: #f4f8f4; color: #2c442a;">
+                                <tr>
+                                    <th style="width: 130px;">
+                                        <div class="custom-control custom-checkbox d-inline-block">
+                                            <input type="checkbox" class="custom-control-input" id="selectAll" checked>
+                                            <label class="custom-control-label font-weight-bold" for="selectAll">Select All</label>
+                                        </div>
+                                    </th>
+                                    <th style="width: 100px;">Roll No.</th>
+                                    <th>Student Name</th>
+                                    <th>Gender</th>
+                                    <th style="min-width: 250px;">Class to which Transferred</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                    <tr>
+                                        <td class="align-middle">
+                                            <div class="custom-control custom-checkbox d-inline-block">
+                                                <input type="checkbox" name="selected_students" value="{{ student.id }}" class="custom-control-input student-checkbox" id="student_{{ student.id }}" checked>
+                                                <label class="custom-control-label" for="student_{{ student.id }}"></label>
+                                            </div>
+                                        </td>
+                                        <td class="align-middle"><span class="badge text-white" style="background-color: #385636;">{{ student.Roll_no }}</span></td>
+                                        <td class="align-middle font-weight-bold" style="color: #2c442a;">{{ student.Name }}</td>
+                                        <td class="align-middle text-muted">{{ student.Gender }}</td>
+                                        <td class="align-middle">
+                                            <select name="target_class_id" class="form-control form-control-sm target-class-dropdown" required style="border-color: #d4e2d4;">
+                                                <option value="">-- Select Target Class --</option>
+                                                {% for cls in classes %}
+                                                    {% if cls.id != selected_source_class.id %}
+                                                        <option value="{{ cls.id }}">
+                                                            Class {{ cls.Class_no }} - {{ cls.Section }} (Division: {{ cls.Division|default:"N/A" }})
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">No students found in this class.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {% if students %}
+                <!-- Action Buttons -->
+                <div class="mb-5 text-right">
+                    <button type="submit" name="transfer_students" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;" id="transferBtn">
+                        <i class="fas fa-random mr-1"></i> Transfer Student
+                    </button>
+                    <a class="btn btn-secondary px-4 py-2 ml-2" href="{% url 'admin_home' %}">Cancel</a>
+                </div>
+            {% endif %}
+        </form>
+
+    {% elif not selected_source_class %}
+        <div class="card shadow-sm border-0 p-5 text-center" style="border-radius: 8px;">
+            <div class="text-muted">
+                <i class="fas fa-user-friends fa-3x mb-3" style="color: #d4e2d4;"></i>
+                <h5>Select Source Class</h5>
+                <p class="small mb-0">Choose a source class from the dropdown above to display student roster for transfer.</p>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+    const targetDropdowns = document.querySelectorAll('.target-class-dropdown');
+    const transferForm = document.getElementById('transferForm');
+
+    // Toggle all checkboxes
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', function () {
+        studentCheckboxes.forEach(cb => {
+          cb.checked = selectAllCheckbox.checked;
+        });
+      });
+    }
+
+    // Uncheck "Select All" if individual checkbox changes
+    studentCheckboxes.forEach(cb => {
+      cb.addEventListener('change', function () {
+        if (!this.checked && selectAllCheckbox) {
+          selectAllCheckbox.checked = false;
+        }
+      });
+    });
+
+    // Synchronize target class dropdown selection across rows
+    targetDropdowns.forEach(dropdown => {
+      dropdown.addEventListener('change', function () {
+        const selectedValue = this.value;
+        targetDropdowns.forEach(d => {
+          d.value = selectedValue;
+        });
+      });
+    });
+
+    // Confirmation dialog with count check on submit
+    if (transferForm) {
+      transferForm.addEventListener('submit', function (e) {
+        const checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+        if (checkedCount === 0) {
+          e.preventDefault();
+          alert('Please select at least one student to transfer.');
+          return;
+        }
+
+        const confirmTransfer = confirm(`Are you sure you want to transfer ${checkedCount} student(s) to the selected class?`);
+        if (!confirmTransfer) {
+          e.preventDefault();
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

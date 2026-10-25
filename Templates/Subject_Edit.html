@@ -1,0 +1,215 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+{% block content %}
+<div class="container my-4 bg-white p-4 rounded shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+         <h3 class=" text-primary font-weight-bold">New Student Admission</h3>
+        <a class="btn btn-secondary ml-2" href="{% url 'TestView' %}" >Back</a>
+    </div>
+
+    
+    <form method="POST" action="{% url 'Student_admission' %}">
+        {% csrf_token %}
+
+        <!-- STUDENT INFORMATION -->
+        <h5 class="border-bottom pb-2 text-secondary">Student Details</h5>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label>Admission No *</label>
+                <input type="text" name="Admission_no" class="form-control" required>
+            </div>
+            <div class="form-group col-md-4">
+                <label>Admission Date *</label>
+                <input type="date" name="Adm_date" class="form-control" value="{{ today_date }}" required>
+            </div>
+            <div class="form-group col-md-4">
+                <label>Class *</label>
+                <select name="Class" class="form-control" required>
+                    <option value="">Select Class</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}">{{ c.Class_no }} - {{ c.Section }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Full Name *</label>
+                <input type="text" name="Name" class="form-control" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Gender *</label>
+                <select name="Gender" class="form-control" required>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label>DOB *</label>
+                <input type="date" name="DOB" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label>Blood Group</label>
+                <select name="Blood_group" class="form-control">
+                    <option value="A+VE">A+VE</option>
+                    <option value="A-VE">A-VE</option>
+                    <option value="B+VE">B+VE</option>
+                    <option value="B-VE">B-VE</option>
+                    <option value="AB+VE">AB+VE</option>
+                    <option value="AB-VE">AB-VE</option>
+                    <option value="O+VE">O+VE</option>
+                    <option value="O-VE">O-VE</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Mobile Number</label>
+                <input type="number" name="MobileNumber" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+                <label>Category</label>
+                <input type="text" name="Category" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+                <label>Caste</label>
+                <input type="text" name="Caste" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label>Religion</label>
+                <input type="text" name="Religion" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+                <label>APL/BPL</label>
+                <select name="APL_BPL" class="form-control">
+                    <option value="APL">APL</option>
+                    <option value="BPL">BPL</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Aadhar Number</label>
+                <input type="text" name="Aadhar" maxlength="12" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+                <label>Local Body</label>
+                <input type="text" name="Local_body" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Address *</label>
+            <textarea name="Address" class="form-control" rows="2" required></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label>Bank Account No</label>
+                <input type="text" name="Bank_ac" class="form-control">
+            </div>
+            <div class="form-group col-md-4">
+                <label>Bank Name</label>
+                <input type="text" name="Bank_name" class="form-control">
+            </div>
+            <div class="form-group col-md-4">
+                <label>IFSC Code</label>
+                <input type="text" name="IFSC" class="form-control">
+            </div>
+        </div>
+
+        <!-- PARENT INFORMATION -->
+        <h5 class="border-bottom pb-2 mt-4 text-secondary">Parent Details</h5>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Father's Name *</label>
+                <input type="text" name="Father_name" class="form-control" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label>Mother's Name *</label>
+                <input type="text" name="Mother_name" class="form-control" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label>Father's Occupation</label>
+                <input type="text" name="F_occupation" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+                <label>Father's Phone *</label>
+                <input type="number" name="F_phone" class="form-control" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Mother's Occupation</label>
+                <input type="text" name="M_occupation" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+                <label>Mother's Phone *</label>
+                <input type="number" name="M_phone" class="form-control" required>
+            </div>
+        </div>
+
+        <!-- SIBLING INFORMATION -->
+        <h5 class="border-bottom pb-2 mt-4 text-secondary">Sibling Details (Optional)</h5>
+        
+        {% for i in "123" %}
+        <div class="form-row align-items-center mb-2">
+            <div class="col-md-1 font-weight-bold">Sibling {{ i }}:</div>
+            <div class="form-group col-md-5 mb-0">
+                <select class="form-control sibling-class-select" data-target="#sibling_{{ i }}_student">
+                    <option value="">-- Select Class --</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}">{{ c.Class_no }} - {{ c.Section }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group col-md-6 mb-0">
+                <select name="sibling_{{ i }}_student" id="sibling_{{ i }}_student" class="form-control">
+                    <option value="">-- Select Student --</option>
+                </select>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="mt-4 text-right">
+            <button type="submit" class="btn btn-success btn-lg px-5">Submit Admission</button>
+            <a class="btn btn-secondary ml-2" href="{% url 'TestView' %}">Back</a>
+
+        </div>
+    </form>
+</div>
+
+<!-- AJAX Script for Dynamic Sibling Dropdowns -->
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $('.sibling-class-select').on('change', function() {
+        var classId = $(this).val();
+        var targetDropdown = $($(this).data('target'));
+        
+        targetDropdown.empty().append('<option value="">-- Select Student --</option>');
+        
+        if (classId) {
+            $.ajax({
+                url: "{% url 'get_students_by_class' %}",
+                data: { 'class_id': classId },
+                dataType: 'json',
+                success: function(data) {
+                    $.each(data, function(index, student) {
+                        targetDropdown.append(
+                            $('<option></option>')
+                                .val(student.id)
+                                .text(student.Name + ' (' + student.Admission_no + ')')
+                        );
+                    });
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

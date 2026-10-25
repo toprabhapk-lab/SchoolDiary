@@ -1,0 +1,150 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Page Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #486E46;">Academic Calendar</h3>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="javascript:history.back()">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Filter Bar for Month and Year Selection -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body p-3 bg-white">
+            <form method="GET" class="form-inline justify-content-between align-items-center flex-wrap">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <h5 class="mb-0 font-weight-bold mr-3" style="color: #486E46;">
+                        <i class="far fa-calendar-alt mr-2"></i> {{ month_name }} {{ selected_year }}
+                    </h5>
+                </div>
+                <div class="d-flex align-items-center flex-wrap">
+                    <label for="month" class="mr-2 font-weight-bold text-secondary">Month:</label>
+                    <select name="month" id="month" class="form-control form-control-sm mr-3 mb-2 mb-sm-0" style="border-color: #d4e2d4;">
+                        <option value="1" {% if selected_month == 1 %}selected{% endif %}>January</option>
+                        <option value="2" {% if selected_month == 2 %}selected{% endif %}>February</option>
+                        <option value="3" {% if selected_month == 3 %}selected{% endif %}>March</option>
+                        <option value="4" {% if selected_month == 4 %}selected{% endif %}>April</option>
+                        <option value="5" {% if selected_month == 5 %}selected{% endif %}>May</option>
+                        <option value="6" {% if selected_month == 6 %}selected{% endif %}>June</option>
+                        <option value="7" {% if selected_month == 7 %}selected{% endif %}>July</option>
+                        <option value="8" {% if selected_month == 8 %}selected{% endif %}>August</option>
+                        <option value="9" {% if selected_month == 9 %}selected{% endif %}>September</option>
+                        <option value="10" {% if selected_month == 10 %}selected{% endif %}>October</option>
+                        <option value="11" {% if selected_month == 11 %}selected{% endif %}>November</option>
+                        <option value="12" {% if selected_month == 12 %}selected{% endif %}>December</option>
+                    </select>
+
+                    <label for="year" class="mr-2 font-weight-bold text-secondary">Year:</label>
+                    <select name="year" id="year" class="form-control form-control-sm mr-3 mb-2 mb-sm-0" style="border-color: #d4e2d4;">
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #486E46; border-color: #486E46;">
+                        <i class="fas fa-filter mr-1"></i> View
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Calendar Legend -->
+    <div class="d-flex flex-wrap align-items-center justify-content-end mb-3 font-size-14 text-muted">
+        <div class="mr-4"><span class="badge mr-1" style="background-color: #486E46; color: white;">&nbsp;</span> Working Day</div>
+        <div class="mr-4"><span class="badge mr-1" style="background-color: #d9534f; color: white;">&nbsp;</span> Weekend / Holiday</div>
+        <div><span class="badge mr-1" style="background-color: #fce205; color: #333333;">&nbsp;</span> Scheduled Exam</div>
+    </div>
+
+    <!-- Calendar Table Card -->
+    <div class="card shadow-sm border-0" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+            <i class="fas fa-list-alt mr-2"></i> Schedule Details for {{ month_name }} {{ selected_year }}
+        </div>
+        <div class="card-body p-0 bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0">
+                    <thead>
+                        <tr style="background-color: #f4f8f4; color: #2c442a;">
+                            <th style="width: 120px;" class="text-center">Date</th>
+                            <th style="width: 130px;" class="text-center">Day</th>
+                            <th style="width: 140px;" class="text-center">Status</th>
+                            <th>Description / Holidays</th>
+                            <th>Class Scheduled Exams</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if calendar_days %}
+                            {% for item in calendar_days %}
+                            <tr style="{% if not item.is_working %}background-color: #f9fbf9;{% endif %}">
+                                <!-- Date -->
+                                <td class="text-center font-weight-bold align-middle" style="color: #2c442a;">
+                                    {{ item.date|date:"d M Y" }}
+                                </td>
+
+                                <!-- Day Name -->
+                                <td class="text-center align-middle font-weight-bold" style="color: #486E46;">
+                                    {{ item.day_name }}
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="text-center align-middle">
+                                    {% if item.is_working %}
+                                        <span class="badge px-3 py-1 text-white" style="background-color: #486E46;">Working Day</span>
+                                    {% elif item.is_weekend %}
+                                        <span class="badge px-3 py-1 text-white" style="background-color: #d9534f;">Weekend</span>
+                                    {% else %}
+                                        <span class="badge px-3 py-1 text-white" style="background-color: #c9302c;">Holiday</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Description / Holiday Info -->
+                                <td class="align-middle">
+                                    {% if item.description %}
+                                        <span class="font-weight-bold" style="color: #385636;">{{ item.description }}</span>
+                                    {% elif item.is_weekend %}
+                                        <span class="text-muted font-italic">Weekly Off</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Scheduled Exams -->
+                                <td class="align-middle">
+                                    {% if item.exams %}
+                                        {% for exam in item.exams %}
+                                            <div class="p-2 mb-1 rounded text-dark" style="background-color: #fce205; border-left: 4px solid #486E46;">
+                                                <strong><i class="fas fa-file-alt mr-1"></i> {{ exam.Name }}</strong> 
+                                                <small class="d-block">
+                                                    Subject: <strong>{{ exam.Subject.Name }}</strong> ({{ exam.Subject.Code }})
+                                                </small>
+                                                <small class="d-block">
+                                                    Time: {{ exam.TimeFrom|time:"h:i A" }} - {{ exam.TimeTo|time:"h:i A" }} | Max Marks: {{ exam.Max_mark }}
+                                                </small>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No calendar details available for this period.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends 'ParentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #486E46;">Homework & Assignments</h3>
+            <h6 class="text-muted">
+                Student: <strong style="color: #2c442a;">{{ student.Name }}</strong> |
+                Class: <strong style="color: #2c442a;">{{ student.Class.Class_no }} - {{ student.Class.Section }}</strong> |
+                Roll No: <strong style="color: #2c442a;">{{ student.Roll_no }}</strong>
+            </h6>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="javascript:history.back()">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Subject Dropdown Filter -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body p-3 bg-white">
+            <form method="GET" class="form-inline justify-content-between align-items-center flex-wrap">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <h5 class="mb-0 font-weight-bold" style="color: #486E46;">
+                        <i class="fas fa-book-open mr-2"></i> Select Subject
+                    </h5>
+                </div>
+                <div class="d-flex align-items-center flex-wrap">
+                    <select name="subject" id="subject" class="form-control form-control-sm mr-2 mb-2 mb-sm-0" style="border-color: #d4e2d4; min-width: 200px;">
+                        <option value="">-- All Subjects --</option>
+                        {% for sub in subjects %}
+                            <option value="{{ sub.id }}" {% if selected_subject_id == sub.id|stringformat:"s" %}selected{% endif %}>
+                                {{ sub.Name }} ({{ sub.Code }})
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="btn btn-sm text-white mr-2" style="background-color: #486E46; border-color: #486E46;">
+                        <i class="fas fa-filter mr-1"></i> Filter
+                    </button>
+                    {% if selected_subject_id %}
+                        <a href="{% url 'student_homework' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-undo mr-1"></i> Reset
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Homework Summary Badges -->
+    <div class="d-flex justify-content-end mb-3 font-size-14 text-muted">
+        <div class="mr-3"><span class="badge px-2 py-1 text-white" style="background-color: #486E46;">Submitted</span></div>
+        <div><span class="badge px-2 py-1 text-white" style="background-color: #d9534f;">Pending</span></div>
+    </div>
+
+    <!-- Homework List Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span>
+                <i class="fas fa-tasks mr-2"></i>
+                {% if selected_subject %}
+                    Homeworks for {{ selected_subject.Name }}
+                {% else %}
+                    All Homework Assignments
+                {% endif %}
+            </span>
+            <span class="badge" style="background-color: #385636; color: #fff; font-size: 13px;">
+                Total: {{ homework_data|length }}
+            </span>
+        </div>
+
+        <div class="card-body p-0 bg-white">
+            {% if homework_data %}
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0">
+                    <thead>
+                        <tr style="background-color: #f4f8f4; color: #2c442a;">
+                            <th class="text-center" style="width: 50px;">#</th>
+                            <th style="min-width: 140px;">Subject</th>
+                            <th class="text-center" style="min-width: 120px;">Announced Date</th>
+                            <th>Homework Description</th>
+                            <th class="text-center" style="min-width: 130px;">Submission Due</th>
+                            <th class="text-center" style="min-width: 120px;">Status</th>
+                            <th class="text-center" style="min-width: 130px;">Submitted Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in homework_data %}
+                        <tr>
+                            <!-- Row Counter -->
+                            <td class="text-center align-middle font-weight-bold" style="color: #486E46;">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <!-- Subject Name & Code -->
+                            <td class="align-middle">
+                                <strong style="color: #2c442a;">{{ item.homework.Subject.Name }}</strong>
+                                <small class="d-block text-muted">Code: {{ item.homework.Subject.Code }}</small>
+                            </td>
+
+                            <!-- Announced / Issue Date -->
+                            <td class="text-center align-middle font-weight-bold" style="color: #486E46;">
+                                {{ item.homework.DateOfIssue|date:"d M Y" }}
+                            </td>
+
+                            <!-- Description -->
+                            <td class="align-middle" style="color: #333;">
+                                {{ item.homework.Description }}
+                            </td>
+
+                            <!-- Due Date -->
+                            <td class="text-center align-middle font-weight-bold" style="color: #d9534f;">
+                                {{ item.homework.Submission_date|date:"d M Y" }}
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td class="text-center align-middle">
+                                {% if item.is_submitted %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #486E46; font-size: 13px;">
+                                        <i class="fas fa-check-circle mr-1"></i> Submitted
+                                    </span>
+                                {% else %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #d9534f; font-size: 13px;">
+                                        <i class="fas fa-clock mr-1"></i> Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Submitted Date -->
+                            <td class="text-center align-middle">
+                                {% if item.is_submitted %}
+                                    <strong style="color: #486E46;">{{ item.submitted_date|date:"d M Y" }}</strong>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="fas fa-clipboard-check fa-2x mb-2" style="color: #486E46;"></i>
+                <p class="mb-0">No homework records found for the selected option.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

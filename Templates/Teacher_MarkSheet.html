@@ -1,0 +1,170 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .report-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .report-header {
+        border-bottom: 2px solid #486E46;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        color: #333333;
+    }
+
+    .filter-btn {
+        background-color: #486E46;
+        color: #ffffff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .filter-btn:hover {
+        background-color: #385636;
+        color: #ffffff;
+    }
+
+    .table-custom-header {
+        background-color: #486E46;
+        color: #ffffff;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .marks-table th, .marks-table td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 14px;
+        padding: 10px 8px;
+    }
+
+    .total-column {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .badge-percentage {
+        background-color: #486E46;
+        color: #ffffff;
+        padding: 4px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+</style>
+
+<div class="report-card">
+        <a class="badge badge-secondary float-md-right" style="font-size: 0.9rem; padding: 8px 12px;" href="{% url 'TeacherHome' %}">&lt;&lt; back</a>
+
+    <div class="report-header text-center">
+        <h2><strong>Student Mark Sheet Report</strong></h2>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="GET" action="" class="row justify-content-center mb-4">
+        <div class="col-md-4 mb-3">
+            <label for="class_id" class="font-weight-bold">Select Class:</label>
+            <select name="class_id" id="class_id" class="form-control" required>
+                <option value="">-- Select Class --</option>
+                {% for cls in classes %}
+                    <option value="{{ cls.id }}" {% if cls.id == selected_class_id %}selected{% endif %}>
+                        {{ cls.Class_no }} - {{ cls.Section }} (Div: {{ cls.Division|default:"N/A" }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label for="exam_name" class="font-weight-bold">Select Examination:</label>
+            <select name="exam_name" id="exam_name" class="form-control" required>
+                <option value="">-- Select Exam --</option>
+                {% for exam in exam_names %}
+                    <option value="{{ exam }}" {% if exam == selected_exam_name %}selected{% endif %}>
+                        {{ exam }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3 d-flex align-items-end">
+            <button type="submit" class="btn filter-btn btn-block">Generate Mark Sheet</button>
+        </div>
+    </form>
+
+    {% if selected_class and selected_exam_name %}
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-secondary m-0">
+                Class: <strong>{{ selected_class.Class_no }}-{{ selected_class.Section }} ({{ selected_class.Division }})</strong>
+            </h4>
+            <h5 class="text-secondary m-0">
+                Exam: <strong>{{ selected_exam_name }}</strong>
+            </h5>
+        </div>
+
+        {% if subjects %}
+            <div class="table-container">
+                <table class="table table-bordered table-striped marks-table">
+                    <thead>
+                        <tr class="table-custom-header">
+                            <th style="width: 80px;">Roll No</th>
+                            <th style="min-width: 180px; text-align: left;">Student Name</th>
+                            {% for subject in subjects %}
+                                <th>{{ subject.Name }}</th>
+                            {% endfor %}
+                            <th class="total-column">Total Score</th>
+                            <th class="total-column">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in mark_sheet_data %}
+                            <tr>
+                                <td>{{ student.roll_no }}</td>
+                                <td style="text-align: left;"><strong>{{ student.name }}</strong></td>
+                                {% for m in student.marks %}
+                                    <td>
+                                        {% if m.score != 'N/A' %}
+                                            <strong>{{ m.score }}</strong> / <small class="text-muted">{{ m.max_mark }}</small>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                <td class="total-column">
+                                    {{ student.total_obtained }} / {{ student.total_max }}
+                                </td>
+                                <td class="total-column">
+                                    <span class="badge badge-percentage">{{ student.percentage }}%</span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{{ subjects|length|add:4 }}" class="text-center text-muted py-4">
+                                    No students found for this class.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-warning text-center my-4" role="alert">
+                No exam schedule or subjects found for <strong>{{ selected_exam_name }}</strong> in this class.
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

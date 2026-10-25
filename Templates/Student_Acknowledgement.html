@@ -1,0 +1,181 @@
+{% extends 'StudentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #486E46;">Student Acknowledgements & Credits</h3>
+            <small class="text-muted">
+                Student: <strong style="color: #2c442a;">{{ student.Name }}</strong> |
+                Class: <strong style="color: #2c442a;">{{ student.Class.Class_no }} - {{ student.Class.Section }}</strong> |
+                Admission No: <strong style="color: #2c442a;">{{ student.Admission_no }}</strong>
+            </small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="javascript:history.back()">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-2">
+            <div class="p-3 rounded text-white shadow-sm d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+                <div>
+                    <h6 class="mb-0 text-uppercase font-weight-bold" style="letter-spacing: 0.5px;">Total Credits</h6>
+                    <small class="text-light">Earned Points</small>
+                </div>
+                <span class="badge badge-light px-3 py-2 font-weight-bold" style="font-size: 18px; color: #486E46;">
+                    {{ total_credits }}
+                </span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-2">
+            <div class="p-3 rounded text-white shadow-sm d-flex justify-content-between align-items-center" style="background-color: #385636;">
+                <div>
+                    <h6 class="mb-0 text-uppercase font-weight-bold" style="letter-spacing: 0.5px;">Gains (Appreciations)</h6>
+                    <small class="text-light">Positive Remarks</small>
+                </div>
+                <span class="badge badge-light px-3 py-2 font-weight-bold" style="font-size: 18px; color: #385636;">
+                    {{ gain_count }}
+                </span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-2">
+            <div class="p-3 rounded text-white shadow-sm d-flex justify-content-between align-items-center" style="background-color: #51714f;">
+                <div>
+                    <h6 class="mb-0 text-uppercase font-weight-bold" style="letter-spacing: 0.5px;">Lessons (Guidance)</h6>
+                    <small class="text-light">Areas to Improve</small>
+                </div>
+                <span class="badge badge-light px-3 py-2 font-weight-bold" style="font-size: 18px; color: #51714f;">
+                    {{ lesson_count }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form Bar -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body p-3 bg-white">
+            <form method="GET" class="form-inline justify-content-between align-items-center flex-wrap">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <h5 class="mb-0 font-weight-bold" style="color: #486E46;">
+                        <i class="fas fa-filter mr-2"></i> Filter Records
+                    </h5>
+                </div>
+                <div class="d-flex align-items-center flex-wrap">
+                    <label for="mode" class="mr-2 font-weight-bold text-secondary">Mode:</label>
+                    <select name="mode" id="mode" class="form-control form-control-sm mr-3 mb-2 mb-sm-0" style="border-color: #d4e2d4; min-width: 150px;">
+                        <option value="">-- All Modes --</option>
+                        <option value="Gain" {% if selected_mode == 'Gain' %}selected{% endif %}>Gain (Appreciation)</option>
+                        <option value="Lesson" {% if selected_mode == 'Lesson' %}selected{% endif %}>Lesson (Guidance)</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-sm text-white mr-2" style="background-color: #486E46; border-color: #486E46;">
+                        <i class="fas fa-search mr-1"></i> Filter
+                    </button>
+                    {% if selected_mode %}
+                        <a href="{% url 'student_acknowledgement' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-undo mr-1"></i> Reset
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Acknowledgement Records Table -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span>
+                <i class="fas fa-award mr-2"></i> Acknowledgement Details
+            </span>
+            <span class="badge" style="background-color: #fce205; color: #333333 !important; font-size: 13px;">
+                Total Records: {{ total_records }}
+            </span>
+        </div>
+
+        <div class="card-body p-0 bg-white">
+            {% if acknowledgements %}
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0">
+                    <thead>
+                        <tr style="background-color: #f4f8f4; color: #2c442a;">
+                            <th class="text-center" style="width: 50px;">#</th>
+                            <th class="text-center" style="min-width: 120px;">Date</th>
+                            <th class="text-center" style="min-width: 110px;">Mode</th>
+                            <th>Description</th>
+                            <th class="text-center" style="min-width: 90px;">Credit</th>
+                            <th class="text-center" style="min-width: 150px;">Parent Verification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ack in acknowledgements %}
+                        <tr>
+                            <!-- Row Number -->
+                            <td class="text-center align-middle font-weight-bold" style="color: #486E46;">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <!-- Date -->
+                            <td class="text-center align-middle font-weight-bold" style="color: #2c442a;">
+                                {{ ack.Date|date:"d M Y" }}
+                            </td>
+
+                            <!-- Mode Badge -->
+                            <td class="text-center align-middle">
+                                {% if ack.Mode == 'Gain' %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #486E46; font-size: 12px;">
+                                        <i class="fas fa-plus-circle mr-1"></i> Gain
+                                    </span>
+                                {% else %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #385636; font-size: 12px;">
+                                        <i class="fas fa-book-reader mr-1"></i> Lesson
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Description -->
+                            <td class="align-middle" style="color: #333;">
+                                {{ ack.Description }}
+                            </td>
+
+                            <!-- Credit Points -->
+                            <td class="text-center align-middle font-weight-bold" style="color: #385636; font-size: 15px;">
+                                {% if ack.Credit != None %}
+                                    {{ ack.Credit }}
+                                {% else %}
+                                    <span class="text-muted" style="font-size: 13px;">-</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Parent Verification Badge -->
+                            <td class="text-center align-middle">
+                                {% if ack.Parent_verification %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #486E46; font-size: 12px;">
+                                        <i class="fas fa-check-circle mr-1"></i> Verified
+                                    </span>
+                                {% else %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #d9534f; font-size: 12px;">
+                                        <i class="fas fa-clock mr-1"></i> Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="fas fa-award fa-2x mb-2" style="color: #486E46;"></i>
+                <p class="mb-0">No acknowledgement records found for the selected option.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,328 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">
+                {% if selected_class %}Edit Class{% else %}Add New Class{% endif %}
+            </h3>
+            <small class="text-muted">Manage class details, assigned teachers, and subject curriculum</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Class Selection Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body bg-white p-3">
+            <div class="form-row align-items-center">
+                <div class="col-md-12">
+                    <label for="select_class" class="font-weight-bold mb-1" style="color: #2c442a;">Select Class (For Editing):</label>
+                    <select id="select_class" class="form-control" onchange="loadClassData(this.value)" style="border-color: #d4e2d4;">
+                        <option value="">-- Create New Class --</option>
+                        {% for c in classes %}
+                            <option value="{{ c.id }}" {% if selected_class and selected_class.id == c.id %}selected{% endif %}>
+                                {{ c.Section }} class {{ c.Class_no }}{{ c.Division }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Class & Subjects Form -->
+    <form method="POST" id="classForm">
+        {% csrf_token %}
+        <input type="hidden" name="class_id" id="class_id" value="{% if selected_class %}{{ selected_class.id }}{% endif %}">
+        <input type="hidden" name="subjects_data" id="subjects_data" value="[]">
+        <input type="hidden" name="action" id="form_action" value="save">
+
+        <!-- Class Information Card -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+                <i class="fas fa-chalkboard mr-2"></i> Class Details
+            </div>
+            <div class="card-body bg-white">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="Class_no" class="font-weight-bold" style="color: #2c442a;">Class Number <span class="text-danger">*</span></label>
+                        <input type="number" name="Class_no" id="Class_no" class="form-control" placeholder="e.g. 5" required value="{% if selected_class %}{{ selected_class.Class_no }}{% endif %}" style="border-color: #d4e2d4;">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="Section" class="font-weight-bold" style="color: #2c442a;">Section <span class="text-danger">*</span></label>
+                        <select name="Section" id="Section" class="form-control" required style="border-color: #d4e2d4;">
+                            <option value="">-- Select Section --</option>
+                            {% for key, val in sections %}
+                                <option value="{{ key }}" {% if selected_class and selected_class.Section == key %}selected{% endif %}>{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="Division" class="font-weight-bold" style="color: #2c442a;">Division <span class="text-danger">*</span></label>
+                        <select name="Division" id="Division" class="form-control" required style="border-color: #d4e2d4;">
+                            <option value="">-- Select Division --</option>
+                            {% for key, val in divisions %}
+                                <option value="{{ key }}" {% if selected_class and selected_class.Division == key %}selected{% endif %}>{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="Class_teacher" class="font-weight-bold" style="color: #2c442a;">Class Teacher <span class="text-danger">*</span></label>
+                        <select name="Class_teacher" id="Class_teacher" class="form-control" required onchange="checkTeacherAssignment(this.value)" style="border-color: #d4e2d4;">
+                            <option value="">-- Select Teacher --</option>
+                            {% for t in teachers %}
+                                <option value="{{ t.id }}" {% if selected_class and selected_class.Class_teacher.id == t.id %}selected{% endif %}>
+                                    {{ t.Name }} {% if t.Designation %}({{ t.Designation }}){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div id="teacherWarning" class="text-warning small mt-1 font-weight-bold" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Subjects Card -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+                <i class="fas fa-book-open mr-2"></i> Class Subjects
+            </div>
+            <div class="card-body bg-white">
+
+                <!-- Dynamic Subject Adding Block -->
+                <div class="p-3 mb-4 rounded border" style="background-color: #f4f8f4; border-color: #d4e2d4 !important;">
+                    <div class="row align-items-end">
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <label class="font-weight-bold small mb-1" style="color: #2c442a;">Subject Code <span class="text-danger">*</span></label>
+                            <input type="text" id="input_subj_code" class="form-control form-control-sm" placeholder="e.g. ENG101" style="border-color: #d4e2d4;">
+                        </div>
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <label class="font-weight-bold small mb-1" style="color: #2c442a;">Subject Name <span class="text-danger">*</span></label>
+                            <input type="text" id="input_subj_name" class="form-control form-control-sm" placeholder="e.g. English" style="border-color: #d4e2d4;">
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <label class="font-weight-bold small mb-1" style="color: #2c442a;">Subject Teacher</label>
+                            <select id="input_subj_teacher" class="form-control form-control-sm" style="border-color: #d4e2d4;">
+                                <option value="">-- Select Teacher --</option>
+                                {% for t in teachers %}
+                                    <option value="{{ t.id }}">{{ t.Name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="btnAddSubject" class="btn text-white btn-sm font-weight-bold w-100" style="background-color: #385636; border-color: #385636;" onclick="addOrUpdateSubject()">
+                                <i class="fas fa-plus mr-1"></i> Add Subject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="subjectTable">
+                        <thead style="background-color: #f4f8f4; color: #2c442a;">
+                            <tr>
+                                <th style="width: 80px;">S.No</th>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Subject Teacher</th>
+                                <th style="width: 150px;" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No subjects added yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Action Buttons -->
+        <div class="mb-5 text-right">
+            <a href="{% url 'Admin_AddEdit_Class' %}" class="btn btn-secondary px-4 py-2 mr-2">Cancel</a>
+
+            <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;" onclick="prepareSubmission('save')">
+                <i class="fas fa-save mr-1"></i> Save Class & Subjects
+            </button>
+
+            {% if selected_class %}
+                <button type="button" class="btn btn-danger font-weight-bold px-4 py-2 ml-2" onclick="confirmRemoveClass()">
+                    <i class="fas fa-trash-alt mr-1"></i> Remove Class
+                </button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<script>
+    let subjectsList = [];
+    let editIndex = -1;
+    const assignedTeachers = {{ assigned_teachers_json|safe }};
+
+    {% if existing_subjects %}
+        {% for s in existing_subjects %}
+            subjectsList.push({
+                code: "{{ s.Code }}",
+                name: "{{ s.Name }}",
+                teacher_id: "{% if s.Subject_teacher %}{{ s.Subject_teacher.id }}{% endif %}",
+                teacher_name: "{% if s.Subject_teacher %}{{ s.Subject_teacher.Name }}{% else %}Unassigned{% endif %}"
+            });
+        {% endfor %}
+        renderSubjectTable();
+    {% endif %}
+
+    function checkTeacherAssignment(teacherId) {
+        const warningDiv = document.getElementById('teacherWarning');
+        if (teacherId in assignedTeachers) {
+            warningDiv.innerText = `⚠️ Warning: Teacher is already Class Teacher for ${assignedTeachers[teacherId]}.`;
+            warningDiv.style.display = 'block';
+        } else {
+            warningDiv.style.display = 'none';
+        }
+    }
+
+    function loadClassData(classId) {
+        if (!classId) {
+            window.location.href = "{% url 'Admin_AddEdit_Class' %}";
+            return;
+        }
+        window.location.href = "{% url 'Admin_AddEdit_Class' %}?class_id=" + classId;
+    }
+
+    function addOrUpdateSubject() {
+        const codeInput = document.getElementById('input_subj_code');
+        const nameInput = document.getElementById('input_subj_name');
+        const teacherSelect = document.getElementById('input_subj_teacher');
+
+        const code = codeInput.value.trim();
+        const name = nameInput.value.trim();
+        const teacherId = teacherSelect.value;
+        const teacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
+
+        if (!code || !name) {
+            alert('Please provide both Subject Code and Subject Name.');
+            return;
+        }
+
+        const isDuplicate = subjectsList.some((subj, idx) => {
+            return subj.code.toUpperCase() === code.toUpperCase() && idx !== editIndex;
+        });
+
+        if (isDuplicate) {
+            alert(`Subject Code "${code}" is already added to this class. Subject codes must be unique!`);
+            return;
+        }
+
+        const subjectObj = {
+            code: code,
+            name: name,
+            teacher_id: teacherId,
+            teacher_name: teacherId ? teacherName : 'Unassigned'
+        };
+
+        const btn = document.getElementById('btnAddSubject');
+
+        if (editIndex >= 0) {
+            subjectsList[editIndex] = subjectObj;
+            editIndex = -1;
+            btn.innerHTML = '<i class="fas fa-plus mr-1"></i> Add Subject';
+            btn.style.backgroundColor = '#385636';
+            btn.style.borderColor = '#385636';
+        } else {
+            subjectsList.push(subjectObj);
+        }
+
+        codeInput.value = '';
+        nameInput.value = '';
+        teacherSelect.value = '';
+
+        renderSubjectTable();
+    }
+
+    function renderSubjectTable() {
+        const tbody = document.getElementById('subjectTableBody');
+        tbody.innerHTML = '';
+
+        if (subjectsList.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No subjects added yet.</td></tr>';
+            return;
+        }
+
+        subjectsList.forEach((subj, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${idx + 1}</td>
+                <td><span class="badge text-white" style="background-color: #385636;">${subj.code}</span></td>
+                <td class="font-weight-bold" style="color: #2c442a;">${subj.name}</td>
+                <td class="text-muted">${subj.teacher_name}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm mr-1 font-weight-bold" style="border: 1px solid #385636; color: #486E46; background: transparent;" onclick="editSubject(${idx})">
+                        <i class="fas fa-pen mr-1"></i> Edit
+                    </button>
+                    <button type="button" class="btn btn-sm font-weight-bold" style="border: 1px solid #dc3545; color: #dc3545; background: transparent;" onclick="deleteSubject(${idx})">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function editSubject(index) {
+        const subj = subjectsList[index];
+        document.getElementById('input_subj_code').value = subj.code;
+        document.getElementById('input_subj_name').value = subj.name;
+        document.getElementById('input_subj_teacher').value = subj.teacher_id;
+
+        editIndex = index;
+        const btn = document.getElementById('btnAddSubject');
+        btn.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Update Subject';
+        btn.style.backgroundColor = '#d39e00';
+        btn.style.borderColor = '#d39e00';
+    }
+
+    function deleteSubject(index) {
+        subjectsList.splice(index, 1);
+        renderSubjectTable();
+    }
+
+    function prepareSubmission(act) {
+        document.getElementById('form_action').value = act;
+        document.getElementById('subjects_data').value = JSON.stringify(subjectsList);
+    }
+
+    function confirmRemoveClass() {
+        const confirmDelete = confirm("Are you sure you want to remove this class? This action cannot be undone.");
+        if (confirmDelete) {
+            document.getElementById('form_action').value = 'delete_class';
+            const form = document.getElementById('classForm');
+            const requiredElements = form.querySelectorAll('[required]');
+            requiredElements.forEach(el => el.removeAttribute('required'));
+            form.submit();
+        }
+    }
+</script>
+{% endblock %}

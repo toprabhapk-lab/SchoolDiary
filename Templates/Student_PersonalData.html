@@ -1,0 +1,128 @@
+{% extends 'StudentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #486E46;">My Personal Profile</h3>
+            <h6 class="text-muted mb-0">Welcome, <strong style="color: #2c442a;">{{ student.Name }}</strong></h6>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="javascript:history.back()">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Main Student Profile Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+            <i class="fas fa-user-graduate mr-2"></i> Academic & Personal Information
+        </div>
+        <div class="card-body bg-white">
+            <div class="row">
+                <!-- Academic Quick Badges -->
+                <div class="col-12 mb-3">
+                    <div class="p-3 rounded d-flex flex-wrap align-items-center justify-content-between" style="background-color: #f4f8f4; border: 1px solid #d4e2d4;">
+                        <div><strong>Admission No:</strong> <span class="badge text-white px-2 py-1 font-size-14" style="background-color: #486E46;">{{ student.Admission_no }}</span></div>
+                        <div><strong>Class & Section:</strong> <span class="badge text-white px-2 py-1" style="background-color: #fce205; color: #333333 !important;">{{ student.Class.Class_no }} - {{ student.Class.Section }}</span></div>
+                        <div><strong>Roll No:</strong> <span class="badge text-white px-2 py-1" style="background-color: #385636;">{{ student.Roll_no }}</span></div>
+                        <div><strong>Admission Date:</strong> <span style="color: #2c442a; font-weight: 600;">{{ student.Adm_date|date:"d M Y" }}</span></div>
+                    </div>
+                </div>
+
+                <!-- Personal Details Fields -->
+                <div class="col-md-4 mb-3"><strong>Full Name:</strong> <div class="text-secondary">{{ student.Name }}</div></div>
+                <div class="col-md-4 mb-3"><strong>Gender:</strong> <div class="text-secondary">{{ student.Gender }}</div></div>
+                <div class="col-md-4 mb-3"><strong>Date of Birth:</strong> <div class="text-secondary">{{ student.DOB|date:"d M Y" }}</div></div>
+
+                <div class="col-md-4 mb-3"><strong>Blood Group:</strong> <div class="text-secondary">{{ student.Blood_group|default:"-" }}</div></div>
+                <div class="col-md-4 mb-3"><strong>Mobile Number:</strong> <div class="text-secondary">{{ student.MobileNumber|default:"-" }}</div></div>
+                <div class="col-md-4 mb-3"><strong>Category:</strong> <div class="text-secondary">{{ student.Category|default:"-" }}</div></div>
+
+                <div class="col-md-4 mb-3"><strong>Religion:</strong> <div class="text-secondary">{{ student.Religion|default:"-" }}</div></div>
+                <div class="col-md-4 mb-3"><strong>Caste:</strong> <div class="text-secondary">{{ student.Caste|default:"-" }}</div></div>
+                <div class="col-md-4 mb-3"><strong>APL / BPL:</strong> <div class="text-secondary">{{ student.APL_BPL|default:"-" }}</div></div>
+
+                <div class="col-md-4 mb-3"><strong>Local Body:</strong> <div class="text-secondary">{{ student.Local_body|default:"-" }}</div></div>
+                <div class="col-md-8 mb-3"><strong>Address:</strong> <div class="text-secondary">{{ student.Address }}</div></div>
+            </div>
+
+            <!-- Banking Section -->
+            <hr class="my-3">
+            <h6 class="font-weight-bold mb-3" style="color: #486E46;"><i class="fas fa-university mr-2"></i> Bank Details</h6>
+            <div class="row">
+                <div class="col-md-4 mb-2"><strong>Bank Name:</strong> <div class="text-secondary">{{ student.Bank_name|default:"-" }}</div></div>
+                <div class="col-md-4 mb-2"><strong>Account Number:</strong> <div class="text-secondary">{{ student.Bank_ac|default:"-" }}</div></div>
+                <div class="col-md-4 mb-2"><strong>IFSC Code:</strong> <div class="text-secondary">{{ student.IFSC|default:"-" }}</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parent Information Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold" style="background-color: #385636;">
+            <i class="fas fa-users mr-2"></i> Parent & Guardian Details
+        </div>
+        <div class="card-body bg-white">
+            {% if parent %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded" style="background-color: #f9fbf9; border-color: #d4e2d4 !important;">
+                        <h6 class="font-weight-bold pb-2" style="color: #486E46; border-bottom: 2px solid #d4e2d4;">Father's Info</h6>
+                        <p class="mb-1"><strong>Name:</strong> <span class="text-secondary">{{ parent.Father_name }}</span></p>
+                        <p class="mb-1"><strong>Occupation:</strong> <span class="text-secondary">{{ parent.F_occupation|default:"-" }}</span></p>
+                        <p class="mb-0"><strong>Phone:</strong> <span class="text-secondary">{{ parent.F_phone }}</span></p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded" style="background-color: #f9fbf9; border-color: #d4e2d4 !important;">
+                        <h6 class="font-weight-bold pb-2" style="color: #486E46; border-bottom: 2px solid #d4e2d4;">Mother's Info</h6>
+                        <p class="mb-1"><strong>Name:</strong> <span class="text-secondary">{{ parent.Mother_name }}</span></p>
+                        <p class="mb-1"><strong>Occupation:</strong> <span class="text-secondary">{{ parent.M_occupation|default:"-" }}</span></p>
+                        <p class="mb-0"><strong>Phone:</strong> <span class="text-secondary">{{ parent.M_phone }}</span></p>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0"><i class="fas fa-info-circle mr-1"></i> No parent details registered.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sibling Information Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold" style="background-color: #51714f;">
+            <i class="fas fa-child mr-2"></i> Sibling Information
+        </div>
+        <div class="card-body bg-white">
+            {% if siblings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr style="background-color: #f4f8f4; color: #2c442a;">
+                            <th>#</th>
+                            <th>Sibling Name</th>
+                            <th>Admission No</th>
+                            <th>Class & Section</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sib in siblings %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="font-weight-bold" style="color: #2c442a;">{{ sib.Name }}</td>
+                            <td><span class="badge text-white" style="background-color: #486E46;">{{ sib.Admission_no }}</span></td>
+                            <td>{{ sib.Class.Class_no }} - {{ sib.Class.Section }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0"><i class="fas fa-info-circle mr-1"></i> No siblings registered in the school system.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Manage Library Books</h3>
+            <small class="text-muted">Add, edit, view, or remove library catalogue entries</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Action Selection Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body bg-white p-3">
+            <div class="form-group mb-0">
+                <label class="font-weight-bold mb-1" style="color: #2c442a;">
+                    Select Action &rarr; Add New Book / View / Edit / Remove Existing Book:
+                </label>
+                <select id="bookSelect" class="form-control" style="border-color: #d4e2d4;">
+                    <option value="NEW">-- Add New Book --</option>
+                    {% for book in library_books %}
+                        <option value="{{ book.id }}">
+                            {{ book.BookNo }} - {{ book.BookName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span id="formHeader">
+                <i class="fas fa-book mr-2"></i> Add New Library Book
+            </span>
+        </div>
+
+        <div class="card-body bg-white">
+            <form method="POST" action="{% url 'Admin_LibraryBooks' %}" id="bookForm">
+                {% csrf_token %}
+                <input type="hidden" name="book_id" id="book_id" value="">
+                <input type="hidden" name="action" id="form_action" value="save">
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Book No. <span class="text-danger">*</span></label>
+                        <input type="text" name="BookNo" id="BookNo" class="form-control" placeholder="Enter Book Number" style="border-color: #d4e2d4;" required>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Language <span class="text-danger">*</span></label>
+                        <select name="Language" id="Language" class="form-control" style="border-color: #d4e2d4;" required>
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Malayalam">Malayalam</option>
+                            <option value="Tamil">Tamil</option>
+                            <option value="Telugu">Telugu</option>
+                            <option value="Kannada">Kannada</option>
+                            <option value="Other_Indian_Language">Other Indian Language</option>
+                            <option value="Foreign_Language">Foreign Language</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold" style="color: #2c442a;">Book Name <span class="text-danger">*</span></label>
+                        <input type="text" name="BookName" id="BookName" class="form-control" placeholder="Enter Book Name" style="border-color: #d4e2d4;" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Author <span class="text-danger">*</span></label>
+                        <input type="text" name="Author" id="Author" class="form-control" placeholder="Enter Author Name" style="border-color: #d4e2d4;" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Publisher <span class="text-danger">*</span></label>
+                        <input type="text" name="Publisher" id="Publisher" class="form-control" placeholder="Enter Publisher Name" style="border-color: #d4e2d4;" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Topic <span class="text-danger">*</span></label>
+                        <input type="text" name="Topic" id="Topic" class="form-control" placeholder="Enter Topic" style="border-color: #d4e2d4;" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label class="font-weight-bold" style="color: #2c442a;">Description</label>
+                        <textarea name="Description" id="Description" class="form-control" placeholder="Enter Description" rows="3" style="border-color: #d4e2d4;"></textarea>
+                    </div>
+                </div>
+
+                <div class="text-right mt-3">
+                    <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;" id="saveBtn">
+                        <i class="fas fa-save mr-1"></i> Save Book
+                    </button>
+                    <button type="button" class="btn btn-danger font-weight-bold px-4 py-2 ml-2 d-none" id="deleteBtn" onclick="confirmDelete()">
+                        <i class="fas fa-trash-alt mr-1"></i> Remove Book
+                    </button>
+                    <a class="btn btn-secondary px-4 py-2 ml-2" href="{% url 'AdminPrincipalFrame' %}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Library Books Table Card -->
+    <div class="card shadow-sm border-0 mb-5" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span><i class="fas fa-list-alt mr-2"></i> Library Books Catalogue</span>
+            <span class="badge badge-light font-weight-bold" style="color: #2c442a;">{{ library_books|length }} Book(s)</span>
+        </div>
+
+        <div class="card-body p-0 bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead style="background-color: #f4f8f4; color: #2c442a;">
+                        <tr>
+                            <th style="width: 120px;">Book No</th>
+                            <th style="text-align: left;">Book Name</th>
+                            <th>Author</th>
+                            <th>Publisher</th>
+                            <th>Language</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in library_books %}
+                        <tr>
+                            <td class="align-middle font-weight-bold" style="color: #2c442a;">
+                                <span class="badge text-white" style="background-color: #385636;">{{ book.BookNo }}</span>
+                            </td>
+                            <td class="align-middle font-weight-bold text-left" style="color: #2c442a;">{{ book.BookName }}</td>
+                            <td class="align-middle">{{ book.Author }}</td>
+                            <td class="align-middle text-muted">{{ book.Publisher }}</td>
+                            <td class="align-middle">{{ book.get_Language_display|default:book.Language }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No library books available in the catalogue.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- JavaScript for dynamic dropdown handling and form submission -->
+<script>
+    const booksData = {
+        {% for book in library_books %}
+            "{{ book.id }}": {
+                "id": "{{ book.id }}",
+                "BookNo": "{{ book.BookNo|escapejs }}",
+                "Language": "{{ book.Language|escapejs }}",
+                "BookName": "{{ book.BookName|escapejs }}",
+                "Author": "{{ book.Author|escapejs }}",
+                "Publisher": "{{ book.Publisher|escapejs }}",
+                "Topic": "{{ book.Topic|escapejs }}",
+                "Description": "{{ book.Description|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    const bookSelect = document.getElementById('bookSelect');
+    const bookIdInput = document.getElementById('book_id');
+    const formAction = document.getElementById('form_action');
+    const formHeader = document.getElementById('formHeader');
+    const deleteBtn = document.getElementById('deleteBtn');
+
+    bookSelect.addEventListener('change', function() {
+        const selectedId = this.value;
+
+        if (selectedId === 'NEW') {
+            bookIdInput.value = '';
+            formHeader.innerHTML = '<i class="fas fa-book mr-2"></i> Add New Library Book';
+            deleteBtn.classList.add('d-none');
+            document.getElementById('bookForm').reset();
+        } else if (booksData[selectedId]) {
+            const data = booksData[selectedId];
+            bookIdInput.value = data.id;
+            formHeader.innerHTML = '<i class="fas fa-edit mr-2"></i> Edit Library Book: ' + data.BookNo;
+            deleteBtn.classList.remove('d-none');
+
+            document.getElementById('BookNo').value = data.BookNo;
+            document.getElementById('Language').value = data.Language;
+            document.getElementById('BookName').value = data.BookName;
+            document.getElementById('Author').value = data.Author;
+            document.getElementById('Publisher').value = data.Publisher;
+            document.getElementById('Topic').value = data.Topic;
+            document.getElementById('Description').value = data.Description;
+        }
+    });
+
+    function confirmDelete() {
+        const bookNo = document.getElementById('BookNo').value;
+        const bookName = document.getElementById('BookName').value;
+
+        if (confirm(`Are you sure you want to remove the book "${bookNo} - ${bookName}"?`)) {
+            formAction.value = 'delete';
+            document.getElementById('bookForm').submit();
+        }
+    }
+</script>
+{% endblock %}

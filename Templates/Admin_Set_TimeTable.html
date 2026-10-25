@@ -1,0 +1,122 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Set / Manage Class Timetable</h3>
+            <small class="text-muted">Configure weekly schedule slots and subject assignments per class</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Class Selection Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body bg-white p-3">
+            <form method="GET" action="" id="classForm">
+                <div class="form-row align-items-center">
+                    <div class="col-md-12">
+                        <label for="class_id" class="font-weight-bold mb-1" style="color: #2c442a;">Select Class:</label>
+                        <select name="class_id" id="class_id" class="form-control" onchange="this.form.submit()" style="border-color: #d4e2d4;">
+                            <option value="">-- Choose Class --</option>
+                            {% for cls in classes %}
+                                <option value="{{ cls.id }}" {% if selected_class_id|add:"0" == cls.id %}selected{% endif %}>
+                                    Class {{ cls.Class_no }} - {{ cls.Section }} {% if cls.Division %}(Division: {{ cls.Division }}){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <noscript><button type="submit" class="btn btn-secondary mt-2">Load</button></noscript>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_class %}
+        <form method="POST" action="">
+            {% csrf_token %}
+            <input type="hidden" name="class_id" value="{{ selected_class.id }}">
+
+            <!-- Timetable Card -->
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+                <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+                    <span><i class="fas fa-calendar-alt mr-2"></i> Weekly Timetable Grid</span>
+                    <span class="badge badge-light font-weight-bold" style="color: #2c442a;">
+                        Class {{ selected_class.Class_no }} - {{ selected_class.Section }}
+                    </span>
+                </div>
+
+                <div class="card-body bg-white p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered align-middle mb-0 text-center">
+                            <thead style="background-color: #f4f8f4; color: #2c442a;">
+                                <tr>
+                                    <th class="align-middle" style="width: 12%; background-color: #e4ede4; color: #2c442a;">Day / Period</th>
+                                    {% for p in periods %}
+                                        <th class="align-middle font-weight-bold" style="min-width: 110px;">Period {{ p }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in timetable_rows %}
+                                    <tr>
+                                        <th class="align-middle font-weight-bold" style="background-color: #f9fbf9; color: #2c442a; border-right: 2px solid #dee2e6;">
+                                            {{ row.day }}
+                                        </th>
+                                        {% for slot in row.slots %}
+                                            <td class="align-middle p-1" style="min-width: 120px;">
+                                                <select name="cell_{{ row.day }}_{{ slot.period }}" class="form-control form-control-sm" style="border-color: #d4e2d4; font-size: 0.85rem;">
+                                                    <option value="">-- Free Period --</option>
+                                                    {% for subject in subjects %}
+                                                        <option value="{{ subject.id }}" {% if slot.selected_subject_id == subject.id %}selected{% endif %} >
+                                                           {{ subject.Code }}-{{ subject.Name }}- {{ subject.Subject_teacher.Name }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mb-5 text-right">
+                <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;">
+                    <i class="fas fa-save mr-1"></i> Save Timetable
+                </button>
+                <a href="{% url 'Admin_Set_TimeTable' %}" class="btn btn-secondary px-4 py-2 ml-2">Cancel</a>
+            </div>
+        </form>
+    {% else %}
+        <div class="card shadow-sm border-0 p-5 text-center" style="border-radius: 8px;">
+            <div class="text-muted">
+                <i class="fas fa-calendar-times fa-3x mb-3" style="color: #d4e2d4;"></i>
+                <h5>Select Class</h5>
+                <p class="small mb-0">Please select a class from the dropdown menu above to schedule or view its timetable.</p>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

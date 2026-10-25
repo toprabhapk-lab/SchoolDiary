@@ -1,0 +1,204 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+  <!-- Header Section with Broadcast Button -->
+  <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+    <div>
+      <h3 class="font-weight-bold mb-0" style="color: #2c442a;">
+        Parent Communication
+        {% if Selected_class %}
+          <small class="text-muted font-weight-normal">(Class: {{ Selected_class.Class_no }}-{{ Selected_class.Section }})</small>
+        {% endif %}
+      </h3>
+    </div>
+    <div class="d-flex align-items-center" style="gap: 10px;">
+      {% if Selected_class %}
+        <!-- Button to trigger Broadcast Modal -->
+        <button type="button" class="btn btn-sm text-white font-weight-bold shadow-sm" style="background-color: #486E46;" data-toggle="modal" data-target="#broadcastModal">
+          <i class="fas fa-bullhorn mr-1"></i> Send to All Parents
+        </button>
+      {% endif %}
+      <a class="btn btn-sm text-white" style="background-color: #385636;" href="{% url 'TeacherHome' %}">
+        <i class="fas fa-arrow-left mr-1"></i> Back
+      </a>
+    </div>
+  </div>
+
+  <!-- Error / Alert Message -->
+  {% if error %}
+    <div class="alert alert-warning shadow-sm border-0 mb-4" role="alert" style="background-color: #fff8e6; border-left: 4px solid #f3be62 !important; color: #8a5a00;">
+      <i class="fas fa-exclamation-triangle mr-2"></i> {{ error }}
+    </div>
+  {% endif %}
+
+  <!-- Student Selector Card -->
+  <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+    <div class="card-body bg-white">
+      <form method="get" class="form-inline">
+        <label for="student" class="font-weight-bold mr-2" style="color: #2c442a;">Select Student:</label>
+        <select id="student" name="student" class="form-control" onchange="this.form.submit()">
+          <option value="">-- Select student --</option>
+          {% for s in students %}
+            <option value="{{ s.id }}" {% if selected_student and s.id == selected_student.id %}selected{% endif %}>
+              Roll {{ s.Roll_no }} - {{ s.Name }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+  </div>
+
+  {% if selected_student %}
+    <!-- Communication History Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+      <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+        <span><i class="fas fa-comments mr-2"></i> Communications for: <strong>{{ selected_student.Name }}</strong></span>
+        <span class="badge badge-light font-weight-normal">Class {{ Selected_class.Class_no }}-{{ Selected_class.Section }}</span>
+      </div>
+      <div class="card-body bg-white p-0">
+        <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+          <table class="table table-hover align-middle mb-0">
+            <thead style="position: sticky; top: 0; z-index: 1;">
+              <tr style="background-color: #f4f8f4; color: #2c442a;">
+                <th class="border-top-0">ID</th>
+                <th class="border-top-0">Date</th>
+                <th class="border-top-0">Communicator</th>
+                <th class="border-top-0" style="width: 30%;">Message</th>
+                <th class="border-top-0">Response To</th>
+                <th class="border-top-0" style="width: 25%;">Action / Reply</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in communications %}
+                <tr>
+                  <td><span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">#{{ c.id }}</span></td>
+                  <td class="text-nowrap text-secondary"><i class="far fa-calendar-alt mr-1"></i> {{ c.Date|date:"d-m-Y" }}</td>
+                  <td>
+                    {% if c.Communicator == 'Parent' %}
+                      <span class="badge text-white px-2 py-1" style="background-color: #2e7d32;">
+                        <i class="fas fa-user-shield mr-1"></i> Parent
+                      </span>
+                    {% else %}
+                      <span class="badge text-white px-2 py-1" style="background-color: #486E46;">
+                        <i class="fas fa-chalkboard-teacher mr-1"></i> Teacher
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td style="white-space: pre-wrap;" class="text-dark">{{ c.Matter }}</td>
+                  <td>
+                    {% if c.ResponseTo %}
+                      <span class="badge badge-light text-muted border"><i class="fas fa-reply mr-1"></i> #{{ c.ResponseTo.id }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <!-- Condition: Reply form appears ONLY if Communicator is Parent AND not replied yet -->
+                    {% if c.can_reply %}
+                      <form method="post" class="d-flex align-items-center" style="gap: 6px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="student" value="{{ selected_student.id }}" />
+                        <input type="hidden" name="action" value="reply" />
+                        <input type="hidden" name="response_to" value="{{ c.id }}" />
+                        <input type="text" name="matter" placeholder="Reply to parent..." class="form-control form-control-sm" required />
+                        <button type="submit" class="btn btn-sm text-white font-weight-bold" style="background-color: #486E46; border-color: #486E46;" title="Send Reply">
+                          <i class="fas fa-paper-plane"></i>
+                        </button>
+                      </form>
+                    {% elif c.Communicator == 'Parent' %}
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">
+                        <i class="fas fa-check-circle mr-1 text-success"></i> Replied
+                      </span>
+                    {% else %}
+                      <span class="text-muted small">N/A</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle mr-1"></i> No communications recorded yet for this student.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Individual Communication Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+      <div class="card-header font-weight-bold" style="background-color: #f4f8f4; color: #2c442a;">
+        <i class="fas fa-paper-plane mr-2" style="color: #486E46;"></i> Send Message to {{ selected_student.Name }}'s Parent
+      </div>
+      <div class="card-body bg-white p-4">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="student" value="{{ selected_student.id }}" />
+          <input type="hidden" name="action" value="new" />
+
+          <div class="form-group">
+            <label for="matter" class="font-weight-bold" style="color: #2c442a;">Message</label>
+            <textarea id="matter" name="matter" class="form-control" rows="3" placeholder="Enter message for this student's parent..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn text-white px-4 font-weight-bold" style="background-color: #486E46; border-color: #486E46;">
+            <i class="fas fa-save mr-1"></i> Send Communication
+          </button>
+        </form>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="alert alert-light shadow-sm border-0 text-muted" role="alert" style="border-left: 4px solid #385636 !important; background-color: #f8faf0;">
+      <i class="fas fa-arrow-up mr-2" style="color: #486E46;"></i> Please select a student above to view history or send individual messages.
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Broadcast to All Parents Modal -->
+<div class="modal fade" id="broadcastModal" tabindex="-1" role="dialog" aria-labelledby="broadcastModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header text-white" style="background-color: #486E46;">
+        <h5 class="modal-title font-weight-bold" id="broadcastModalLabel">
+          <i class="fas fa-bullhorn mr-2"></i> Broadcast Message to All Parents
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="broadcast" />
+        {% if selected_student %}
+          <input type="hidden" name="student" value="{{ selected_student.id }}" />
+        {% endif %}
+
+        <div class="modal-body p-4 bg-white">
+          <p class="text-muted small mb-3">
+            <i class="fas fa-info-circle mr-1" style="color: #486E46;"></i>
+            This message will be sent individually to all parents in <strong>Class {{ Selected_class.Class_no }}-{{ Selected_class.Section }}</strong> (Total: {{ students|length }} students).
+          </p>
+          <div class="form-group mb-0">
+            <label for="broadcast_matter" class="font-weight-bold" style="color: #2c442a;">Message Content *</label>
+            <textarea id="broadcast_matter" name="matter" class="form-control" rows="4" placeholder="Type notification or message for all parents..." required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm text-white font-weight-bold rounded-pill px-4" style="background-color: #486E46;">
+            <i class="fas fa-paper-plane mr-1"></i> Send Broadcast
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

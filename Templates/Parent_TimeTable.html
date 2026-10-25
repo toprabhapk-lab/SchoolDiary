@@ -1,0 +1,97 @@
+{% extends 'ParentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header & Student Info Card -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-2 bg-white rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-1" style="color: #486E46;">
+                <i class="fas fa-calendar-alt mr-2" style="color: #486E46;"></i>Class Timetable
+            </h3>
+            <small class="text-muted">
+                Student: <strong style="color: #2c442a;">{{ student.Name }}</strong> |
+                Class: <strong style="color: #2c442a;">{{ student_class.Class_no }} - {{ student_class.Section }}</strong> |
+                Admission No: <strong style="color: #2c442a;">{{ student.Admission_no }}</strong>
+            </small>
+        </div>
+        <a class="btn btn-sm text-white font-weight-bold shadow-sm" style="background-color: #385636; border-color: #385636;" href="javascript:history.back()">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Timetable Card -->
+    <div class="card shadow-sm border-0" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span style="font-size: 0.875rem;">
+                <i class="fas fa-clock mr-1" style="color: #fce205;"></i> Weekly Schedule — Class {{ student_class.Class_no }} ({{ student_class.Section }})
+            </span>
+        </div>
+
+        <div class="card-body p-0 bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered text-center align-middle mb-0">
+                    <thead>
+                        <tr style="background-color: #f4f8f4; color: #2c442a;">
+                            <th class="align-middle" style="width: 14%; background-color: #e4ede4; color: #2c442a;">
+                                <small>
+                                    Day / Period
+                                </small>
+                            </th>
+                            {% for p in periods %}
+                                <th class="align-middle font-weight-bold" style="min-width: 110px;">
+                                    Period {{ p }}
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in timetable_rows %}
+                            <tr>
+                                <!-- Day Column -->
+                                <th class="align-middle font-weight-bold" style="background-color: #f8f9fa; color: #486E46; border-right: 2px solid #dee2e6;">
+                                    {{ row.day }}
+                                </th>
+
+                                <!-- Period Slots -->
+                                {% for slot in row.slots %}
+                                    <td class="align-middle p-1" style="min-width: 120px;">
+                                        {% if slot.subject %}
+                                            <div class="p-1 rounded" style="background-color: #f9fbf9; border: 1px solid #d4e2d4;">
+                                                <div class="font-weight-bold" style="color: #2c442a; font-size: 0.95rem;">
+                                                    {{ slot.subject.Name }}
+                                                </div>
+                                                <small class="text-muted d-block mt-1" style="font-size: 0.8rem;">
+                                                    <i class="fas fa-chalkboard-teacher mr-1" style="color: #486E46;"></i>{{ slot.subject.Subject_teacher.Name }}
+                                                </small>
+                                            </div>
+                                        {% else %}
+                                            <span class="badge badge-light px-1 py-1 font-weight-normal text-muted" style="border: 1px dashed #cccccc; background-color: #fafafa;">
+                                                — Free —
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

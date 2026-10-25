@@ -1,0 +1,153 @@
+{% extends 'TeacherFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+    <div>
+      <h3 class="font-weight-bold mb-0" style="color: #2c442a;">
+        Student Acknowledgments
+        {% if Selected_class %}
+          <small class="text-muted font-weight-normal">(Class: {{ Selected_class.Class_no }}-{{ Selected_class.Section }})</small>
+        {% endif %}
+      </h3>
+    </div>
+    <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'TeacherHome' %}">
+      <i class="fas fa-arrow-left mr-1"></i> Back
+    </a>
+  </div>
+
+  <!-- Error / Alert Message -->
+  {% if error %}
+    <div class="alert alert-warning shadow-sm border-0 mb-4" role="alert" style="background-color: #fff8e6; border-left: 4px solid #f3be62 !important; color: #8a5a00;">
+      <i class="fas fa-exclamation-triangle mr-2"></i> {{ error }}
+    </div>
+  {% endif %}
+
+  <!-- Student Selector Card -->
+  <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+    <div class="card-body bg-white">
+      <form method="get" class="form-inline">
+        <label for="student" class="font-weight-bold mr-2" style="color: #2c442a;">Select Student:</label>
+        <select id="student" name="student" class="form-control" onchange="this.form.submit()">
+          <option value="">-- Select student --</option>
+          {% for s in students %}
+            <option value="{{ s.id }}" {% if selected_student and s.id == selected_student.id %}selected{% endif %}>
+              Roll {{ s.Roll_no }} - {{ s.Name }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+  </div>
+
+  {% if selected_student %}
+    <!-- Acknowledgments History Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+      <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+        <span><i class="fas fa-history mr-2"></i> Acknowledgments History: <strong>{{ selected_student.Name }}</strong></span>
+        <span class="badge badge-light font-weight-normal">Scroll for history</span>
+      </div>
+      <div class="card-body bg-white p-0">
+        <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+          <table class="table table-hover align-middle mb-0">
+            <thead style="position: sticky; top: 0; z-index: 1;">
+              <tr style="background-color: #f4f8f4; color: #2c442a;">
+                <th class="border-top-0">Mode</th>
+                <th class="border-top-0">Date of Issue</th>
+                <th class="border-top-0">Description</th>
+                <th class="border-top-0">Credit Points</th>
+                <th class="border-top-0">Principal Verification</th>
+                <th class="border-top-0">Parent Verification</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in Acknowledgements %}
+                <tr>
+                  <td>
+                    {% if c.Mode == 'Gain' %}
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;"><i class="fas fa-plus-circle mr-1"></i> {{ c.Mode }}</span>
+                    {% else %}
+                      <span class="badge px-2 py-1" style="background-color: #fce8bd; color: #734d00;"><i class="fas fa-book-reader mr-1"></i> {{ c.Mode }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-nowrap text-secondary"><i class="far fa-calendar-alt mr-1"></i> {{ c.Date }}</td>
+                  <td style="white-space: pre-wrap;" class="text-dark">{{ c.Description }}</td>
+                  <td>
+                    <span class="badge text-white px-2 py-1" style="background-color: #385636;">{{ c.Credit }}</span>
+                  </td>
+                  <td>
+                    {% if c.Principal_verification %}
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;"><i class="fas fa-check-circle mr-1"></i> Verified</span>
+                    {% else %}
+                      <span class="badge badge-light text-muted border px-2 py-1"><i class="fas fa-clock mr-1"></i> Pending</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if c.Parent_verification %}
+                      <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;"><i class="fas fa-check-circle mr-1"></i> Verified</span>
+                    {% else %}
+                      <span class="badge badge-light text-muted border px-2 py-1"><i class="fas fa-clock mr-1"></i> Pending</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle mr-1"></i> No acknowledgments recorded yet for this student.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add New Acknowledgment Form Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+      <div class="card-header font-weight-bold" style="background-color: #e4ede4; color: #2c442a;">
+        <i class="fas fa-plus-circle mr-2" style="color: #486E46;"></i> Add New Acknowledgment
+      </div>
+      <div class="card-body bg-white p-4">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="student" value="{{ selected_student.id }}" />
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="Mode" class="font-weight-bold" style="color: #2c442a;">Mode</label>
+              <select id="Mode" name="Mode" class="form-control">
+                <option value="Gain">Gain</option>
+                <option value="Lesson">Lesson</option>
+              </select>
+            </div>
+
+            <div class="form-group col-md-6">
+              <label for="Credit" class="font-weight-bold" style="color: #2c442a;">Credit Point</label>
+              <input id="Credit" name="Credit" type="number" class="form-control" value="0" min="0" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="Description" class="font-weight-bold" style="color: #2c442a;">Description</label>
+            <textarea id="Description" name="Description" class="form-control" rows="4" placeholder="Enter acknowledgment details..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn text-white px-4 font-weight-bold" style="background-color: #486E46; border-color: #486E46;">
+            <i class="fas fa-save mr-1"></i> Save Acknowledgment
+          </button>
+        </form>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="alert alert-light shadow-sm border-0 text-muted" role="alert" style="border-left: 4px solid #385636 !important; background-color: #f8faf0;">
+      <i class="fas fa-arrow-up mr-2" style="color: #486E46;"></i> Please select a student above to view or add acknowledgments.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">New Student Admission</h3>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <form method="POST" action="{% url 'Student_admission' %}">
+        {% csrf_token %}
+
+        <!-- 1. STUDENT INFORMATION CARD -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #486E46;">
+                <i class="fas fa-user-graduate mr-2"></i> Student Details
+            </div>
+            <div class="card-body bg-white">
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Admission No <span class="text-danger">*</span></label>
+                        <input type="text" name="Admission_no" class="form-control" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Admission Date <span class="text-danger">*</span></label>
+                        <input type="date" name="Adm_date" class="form-control" value="{{ today_date }}" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Class <span class="text-danger">*</span></label>
+                        <select name="Class" class="form-control" required style="border-color: #d4e2d4;">
+                            <option value="">Select Class</option>
+                            {% for c in classes %}
+                                <option value="{{ c.id }}">{{ c.Class_no }} - {{ c.Section }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold" style="color: #2c442a;">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" class="form-control" required style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Gender <span class="text-danger">*</span></label>
+                        <select name="Gender" class="form-control" required style="border-color: #d4e2d4;">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">DOB <span class="text-danger">*</span></label>
+                        <input type="date" name="DOB" class="form-control" required style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Blood Group</label>
+                        <select name="Blood_group" class="form-control" style="border-color: #d4e2d4;">
+                            <option value="A+VE">A+VE</option>
+                            <option value="A-VE">A-VE</option>
+                            <option value="B+VE">B+VE</option>
+                            <option value="B-VE">B-VE</option>
+                            <option value="AB+VE">AB+VE</option>
+                            <option value="AB-VE">AB-VE</option>
+                            <option value="O+VE">O+VE</option>
+                            <option value="O-VE">O-VE</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Mobile Number</label>
+                        <input type="number" name="MobileNumber" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Category</label>
+                        <input type="text" name="Category" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Caste</label>
+                        <input type="text" name="Caste" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Religion</label>
+                        <input type="text" name="Religion" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">APL / BPL</label>
+                        <select name="APL_BPL" class="form-control" style="border-color: #d4e2d4;">
+                            <option value="APL">APL</option>
+                            <option value="BPL">BPL</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Aadhar Number</label>
+                        <input type="text" name="Aadhar" maxlength="12" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="font-weight-bold" style="color: #2c442a;">Local Body</label>
+                        <input type="text" name="Local_body" class="form-control" style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold" style="color: #2c442a;">Address <span class="text-danger">*</span></label>
+                    <textarea name="Address" class="form-control" rows="2" required style="border-color: #d4e2d4;"></textarea>
+                </div>
+
+                <!-- Banking Sub-Section -->
+                <div class="p-3 rounded mt-3" style="background-color: #f4f8f4; border: 1px solid #d4e2d4;">
+                    <h6 class="font-weight-bold mb-3" style="color: #486E46;">
+                        <i class="fas fa-university mr-2"></i> Bank Details
+                    </h6>
+                    <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                            <label class="font-weight-bold" style="color: #2c442a;">Bank Account No</label>
+                            <input type="text" name="Bank_ac" class="form-control bg-white" style="border-color: #d4e2d4;">
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                            <label class="font-weight-bold" style="color: #2c442a;">Bank Name</label>
+                            <input type="text" name="Bank_name" class="form-control bg-white" style="border-color: #d4e2d4;">
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                            <label class="font-weight-bold" style="color: #2c442a;">IFSC Code</label>
+                            <input type="text" name="IFSC" class="form-control bg-white" style="border-color: #d4e2d4;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PARENT INFORMATION CARD -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #385636;">
+                <i class="fas fa-users mr-2"></i> Parent & Guardian Details
+            </div>
+            <div class="card-body bg-white">
+                <div class="row">
+                    <!-- Father's Box -->
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded" style="background-color: #f9fbf9; border-color: #d4e2d4 !important;">
+                            <h6 class="font-weight-bold pb-2" style="color: #486E46; border-bottom: 2px solid #d4e2d4;">Father's Details</h6>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Father's Name <span class="text-danger">*</span></label>
+                                <input type="text" name="Father_name" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Occupation</label>
+                                <input type="text" name="F_occupation" class="form-control bg-white" style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold" style="color: #2c442a;">Phone Number <span class="text-danger">*</span></label>
+                                <input type="number" name="F_phone" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mother's Box -->
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded" style="background-color: #f9fbf9; border-color: #d4e2d4 !important;">
+                            <h6 class="font-weight-bold pb-2" style="color: #486E46; border-bottom: 2px solid #d4e2d4;">Mother's Details</h6>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Mother's Name <span class="text-danger">*</span></label>
+                                <input type="text" name="Mother_name" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold" style="color: #2c442a;">Occupation</label>
+                                <input type="text" name="M_occupation" class="form-control bg-white" style="border-color: #d4e2d4;">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold" style="color: #2c442a;">Phone Number <span class="text-danger">*</span></label>
+                                <input type="number" name="M_phone" class="form-control bg-white" required style="border-color: #d4e2d4;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SIBLING INFORMATION CARD -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+            <div class="card-header text-white font-weight-bold" style="background-color: #51714f;">
+                <i class="fas fa-child mr-2"></i> Sibling Information (Optional)
+            </div>
+            <div class="card-body bg-white">
+                {% for i in "123" %}
+                <div class="form-row align-items-center mb-3 p-2 rounded" style="background-color: #f4f8f4;">
+                    <div class="col-md-2 font-weight-bold" style="color: #2c442a;">Sibling {{ i }}:</div>
+                    <div class="form-group col-md-5 mb-0">
+                        <select class="form-control sibling-class-select bg-white" data-target="#sibling_{{ i }}_student" style="border-color: #d4e2d4;">
+                            <option value="">-- Select Class --</option>
+                            {% for c in classes %}
+                                <option value="{{ c.id }}">{{ c.Class_no }} - {{ c.Section }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-5 mb-0">
+                        <select name="sibling_{{ i }}_student" id="sibling_{{ i }}_student" class="form-control bg-white" style="border-color: #d4e2d4;">
+                            <option value="">-- Select Student --</option>
+                        </select>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mb-5 text-right">
+            <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;">
+                <i class="fas fa-save mr-1"></i> Submit Admission
+            </button>
+            <a class="btn btn-secondary px-4 py-2 ml-2" href="{% url 'admin_home' %}">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- AJAX Script for Dynamic Sibling Dropdowns -->
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $('.sibling-class-select').on('change', function() {
+        var classId = $(this).val();
+        var targetDropdown = $($(this).data('target'));
+        
+        targetDropdown.empty().append('<option value="">-- Select Student --</option>');
+        
+        if (classId) {
+            $.ajax({
+                url: "{% url 'get_students_by_class' %}",
+                data: { 'class_id': classId },
+                dataType: 'json',
+                success: function(data) {
+                    $.each(data, function(index, student) {
+                        targetDropdown.append(
+                            $('<option></option>')
+                                .val(student.id)
+                                .text(student.Name + ' (' + student.Admission_no + ')')
+                        );
+                    });
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

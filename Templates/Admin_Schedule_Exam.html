@@ -1,0 +1,275 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Schedule & Manage Class Examinations</h3>
+            <small class="text-muted">Set up exam schedules, timetable entries, and maximum marks by class</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filter Section Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body bg-white p-3">
+            <form method="GET" action="" id="filterForm">
+                <div class="form-row align-items-end">
+                    <div class="col-md-5 mb-2 mb-md-0">
+                        <label for="class_id" class="font-weight-bold mb-1" style="color: #2c442a;">Select Class:</label>
+                        <select name="class_id" id="class_id" class="form-control" onchange="this.form.submit()" style="border-color: #d4e2d4;">
+                            <option value="">-- Choose Class --</option>
+                            {% for cls in classes %}
+                                <option value="{{ cls.id }}" {% if selected_class_id == cls.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ cls.Section }}-Class {{ cls.Class_no }} - {{ cls.Division }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if selected_class %}
+                    <div class="col-md-5 mb-2 mb-md-0">
+                        <label for="exam_name" class="font-weight-bold mb-1" style="color: #2c442a;">Select Existing Exam Schedule:</label>
+                        <select name="exam_name" id="exam_name" class="form-control" onchange="this.form.submit()" style="border-color: #d4e2d4;">
+                            <option value="">-- Create New Exam Schedule --</option>
+                            {% for ename in existing_exam_names %}
+                                <option value="{{ ename }}" {% if selected_exam_name == ename %}selected{% endif %}>
+                                    {{ ename }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-md-2 text-right">
+                        <a href="{% url 'Admin_Schedule_Exam' %}" class="btn btn-outline-secondary btn-block font-weight-bold">
+                            <i class="fas fa-undo mr-1"></i> Reset Filters
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_class %}
+    <!-- Input Form Card Section for Exam Entry -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span>
+                <i class="fas {% if edit_exam_obj %}fa-edit{% else %}fa-plus-circle{% endif %} mr-2"></i>
+                {% if edit_exam_obj %} Edit Exam Entry {% else %} Add Exam Schedule Entry {% endif %}
+            </span>
+            <span class="badge badge-light font-weight-bold" style="color: #2c442a;">
+                Class: {{ selected_class.Section }} - {{ selected_class.Class_no }}{{ selected_class.Division }}
+            </span>
+        </div>
+
+        <div class="card-body bg-white">
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="class_id" value="{{ selected_class.id }}">
+
+                {% if edit_exam_obj %}
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="exam_id" value="{{ edit_exam_obj.id }}">
+                {% else %}
+                    <input type="hidden" name="action" value="add">
+                {% endif %}
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Exam Name <span class="text-danger">*</span></label>
+                        <input type="text" name="exam_name_input" class="form-control" required
+                               placeholder="e.g., First Mid Term Examination" style="border-color: #d4e2d4;"
+                               value="{% if edit_exam_obj %}{{ edit_exam_obj.Name }}{% else %}{{ selected_exam_name }}{% endif %}">
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Subject <span class="text-danger">*</span></label>
+                        <select name="subject_id" class="form-control" required style="border-color: #d4e2d4;">
+                            <option value="">-- Select Subject --</option>
+                            {% for sub in subjects %}
+                                <option value="{{ sub.id }}" {% if edit_exam_obj and edit_exam_obj.Subject.id == sub.id %}selected{% endif %}>
+                                    {{ sub.Name }} ({{ sub.Code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Exam Date (Working Day) <span class="text-danger">*</span></label>
+                        <input type="date" id="exam_date" name="exam_date" class="form-control" required style="border-color: #d4e2d4;"
+                               value="{% if edit_exam_obj %}{{ edit_exam_obj.Date|date:'Y-m-d' }}{% endif %}">
+                        <small id="weekend_warning" class="text-danger font-weight-bold mt-1 d-block" style="display: none;">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Warning: Selected date falls on a weekend.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Time From <span class="text-danger">*</span></label>
+                        <input type="time" name="time_from" class="form-control" required style="border-color: #d4e2d4;"
+                               value="{% if edit_exam_obj %}{{ edit_exam_obj.TimeFrom|time:'H:i' }}{% endif %}">
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Time To <span class="text-danger">*</span></label>
+                        <input type="time" name="time_to" class="form-control" required style="border-color: #d4e2d4;"
+                               value="{% if edit_exam_obj %}{{ edit_exam_obj.TimeTo|time:'H:i' }}{% endif %}">
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold" style="color: #2c442a;">Maximum Mark <span class="text-danger">*</span></label>
+                        <input type="number" min="1" name="max_mark" class="form-control" required style="border-color: #d4e2d4;"
+                               placeholder="e.g. 100"
+                               value="{% if edit_exam_obj %}{{ edit_exam_obj.Max_mark }}{% endif %}">
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;">
+                        <i class="fas {% if edit_exam_obj %}fa-sync-alt{% else %}fa-plus{% endif %} mr-1"></i>
+                        {% if edit_exam_obj %} Update Entry {% else %} Add Entry {% endif %}
+                    </button>
+                    {% if edit_exam_obj %}
+                        <a href="?class_id={{ selected_class.id }}&exam_name={{ selected_exam_name }}" class="btn btn-secondary px-4 py-2 ml-2">Cancel Edit</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule List Card & Table -->
+    {% if scheduled_exams %}
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span><i class="fas fa-list-alt mr-2"></i> Scheduled Exams List</span>
+            <span class="badge badge-light font-weight-bold" style="color: #2c442a;">{{ scheduled_exams|length }} Entry(ies)</span>
+        </div>
+
+        <div class="card-body bg-white p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead style="background-color: #f4f8f4; color: #2c442a;">
+                        <tr>
+                            <th style="width: 70px;">S.No</th>
+                            <th>Subject Name</th>
+                            <th>Exam Date</th>
+                            <th>Time From</th>
+                            <th>Time To</th>
+                            <th>Max Mark</th>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exam in scheduled_exams %}
+                        <tr>
+                            <td class="align-middle">{{ forloop.counter }}</td>
+                            <td class="align-middle font-weight-bold" style="color: #2c442a;">{{ exam.Subject.Name }}</td>
+                            <td class="align-middle"><span class="badge text-white" style="background-color: #385636;">{{ exam.Date }}</span></td>
+                            <td class="align-middle text-muted">{{ exam.TimeFrom|time:"h:i A" }}</td>
+                            <td class="align-middle text-muted">{{ exam.TimeTo|time:"h:i A" }}</td>
+                            <td class="align-middle font-weight-bold" style="color: #486E46;">{{ exam.Max_mark }}</td>
+                            <td class="align-middle">
+                                <a href="?class_id={{ selected_class.id }}&exam_name={{ selected_exam_name }}&edit_id={{ exam.id }}"
+                                   class="btn btn-sm mr-1 border-0"
+                                   style="background-color: #f4f8f4; color: #486E46; border-radius: 6px;"
+                                   title="Edit Entry">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+
+                                <form method="POST" action="" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this schedule item?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="class_id" value="{{ selected_class.id }}">
+                                    <input type="hidden" name="exam_name" value="{{ selected_exam_name }}">
+                                    <input type="hidden" name="exam_id" value="{{ exam.id }}">
+                                    <button type="submit"
+                                            class="btn btn-sm border-0"
+                                            style="background-color: #fbe3e3; color: #dc3545; border-radius: 6px;"
+                                            title="Delete Entry">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Save & Finalize Action Buttons -->
+    <div class="mb-5 text-right">
+        <a href="{% url 'Admin_Schedule_Exam' %}?class_id={{ selected_class.id }}&exam_name={{ selected_exam_name }}"
+           class="btn text-white font-weight-bold px-4 py-2"
+           style="background-color: #385636; border-color: #385636;">
+            <i class="fas fa-save mr-1"></i> Save Exam Schedule
+        </a>
+        <a href="{% url 'admin_home' %}" class="btn btn-secondary px-4 py-2 ml-2">Cancel</a>
+    </div>
+
+    {% elif not selected_class %}
+    <div class="card shadow-sm border-0 p-5 text-center" style="border-radius: 8px;">
+        <div class="text-muted">
+            <i class="fas fa-calendar-alt fa-3x mb-3" style="color: #d4e2d4;"></i>
+            <h5>Select a Class</h5>
+            <p class="small mb-0">Choose a class from the dropdown above to create or manage examination schedules.</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Script to check for Saturday / Sunday -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('exam_date');
+    const warningText = document.getElementById('weekend_warning');
+
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            if (!this.value) {
+                if (warningText) warningText.style.display = 'none';
+                return;
+            }
+
+            const parts = this.value.split('-');
+            const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            const dayOfWeek = selectedDate.getDay();
+
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                const dayName = dayOfWeek === 0 ? 'Sunday' : 'Saturday';
+                alert('Attention: The selected exam date (' + this.value + ') falls on a ' + dayName + '!');
+                if (warningText) {
+                    warningText.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i> Warning: The selected date is a ' + dayName + '.';
+                    warningText.style.display = 'block';
+                }
+            } else {
+                if (warningText) warningText.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'StudentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .notice-card {
+        border: none;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .notice-header {
+        background-color: #486E46; /* Matching ParentFrame Primary Theme */
+        color: #ffffff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 4px solid #385636;
+    }
+
+    .notice-title {
+        color: #ffffff;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .btn-back {
+        background-color: #385636;
+        color: #ffffff !important;
+        font-weight: 600;
+        border: none;
+        border-radius: 20px;
+        padding: 6px 18px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background-color: #2c442a;
+        color: #ffffff !important;
+        text-decoration: none;
+    }
+
+    .notice-table-container {
+        max-height: 520px;
+        overflow-y: auto;
+    }
+
+    .table-custom thead th {
+        background-color: #486E46;
+        color: #ffffff;
+        border: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.88rem;
+        letter-spacing: 0.5px;
+    }
+
+    .notice-date-badge {
+        background-color: #f4f8f4;
+        color: #486E46;
+        border: 1px solid #d4e2d4;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 6px;
+        display: inline-block;
+        font-size: 0.85rem;
+    }
+
+    .notice-item-title {
+        color: #2c442a;
+        font-size: 1.1rem;
+    }
+
+    .remark-box {
+        background-color: #f9fbf9;
+        border-left: 3px solid #486E46;
+        padding: 6px 12px;
+        border-radius: 0 4px 4px 0;
+        color: #385636;
+        font-style: italic;
+    }
+
+    /* Custom scrollbar for table container */
+    .notice-table-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    .notice-table-container::-webkit-scrollbar-thumb {
+        background-color: #486E46;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="container my-4">
+    <div class="card notice-card">
+        <!-- Header Section -->
+        <div class="notice-header d-flex justify-content-between align-items-center">
+            <div class="mb-3">
+            <h3 class="notice-title m-0">
+                <i class="fas fa-bullhorn mr-2"></i>School Notices
+            </h3>
+            <h6>
+                Student: <strong style="color: #fce205;" >{{ student.Name }}</strong> |
+                Class: <strong style="color: #fce205;">{{ student.Class.Class_no }} - {{ student.Class.Section }}</strong> |
+                Roll No: <strong style="color: #fce205;">{{ student.Roll_no }}</strong>
+            </h6>
+            </div>
+            <a class="btn btn-back shadow-sm" href="{% url 'StudentHome' %}">
+                <i class="fas fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+
+        <!-- Scrollable Table Section -->
+        <div class="notice-table-container">
+            <table class="table table-hover mb-0">
+                <thead class="table-custom" style="position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th scope="col" style="width: 20%;" class="text-center">Date</th>
+                        <th scope="col" style="width: 80%;">Notice Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if notices %}
+                        {% for notice in notices %}
+                        <tr>
+                            <!-- Date Column -->
+                            <td class="text-center align-middle">
+                                <span class="notice-date-badge">
+                                    <i class="fas fa-calendar-alt mr-1" style="color: #486E46;"></i>
+                                    {{ notice.IssueDate|date:"d-m-Y" }}
+                                </span>
+                            </td>
+                            <!-- Title & Content Column -->
+                            <td class="py-3">
+                                <h5 class="notice-item-title font-weight-bold mb-1">
+                                    {{ notice.Title|default:"No Title" }}
+                                </h5>
+                                <p class="mb-2 text-secondary" style="white-space: pre-line; line-height: 1.5;">
+                                    {{ notice.Matter|default:"No description provided." }}
+                                </p>
+                                {% if notice.Remark %}
+                                    <div class="remark-box mt-2">
+                                        <small><strong>Remark:</strong> {{ notice.Remark }}</small>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted py-5">
+                                <i class="fas fa-info-circle fa-2x mb-2" style="color: #486E46;"></i>
+                                <p class="mb-0 fs-5">No notices available at this time.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

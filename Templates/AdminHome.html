@@ -1,0 +1,350 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Hero Welcome Banner */
+  .admin-welcome-hero {
+    background: linear-gradient(135deg, #486E46 0%, #385636 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 22px 28px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .admin-welcome-hero h2 {
+    font-weight: 700;
+    font-size: 1.65rem;
+    margin-bottom: 4px;
+    color: #ffffff;
+  }
+
+  .admin-welcome-hero p {
+    font-size: 0.92rem;
+    margin: 0;
+    opacity: 0.92;
+    color: #ffffff;
+  }
+
+  /* Info/Metrics Cards Styling */
+  .profile-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    border: 1px solid #eef0f2;
+    overflow: hidden;
+  }
+
+  .profile-card .card-header-custom {
+    background-color: #f4f8f4;
+    color: #2c442a;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-bottom: 1px solid #d4e2d4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.92rem;
+  }
+
+  .profile-card .card-body-custom {
+    padding: 14px 18px;
+  }
+
+  .info-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #f0f2ea;
+  }
+
+  .info-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.82rem;
+  }
+
+  .info-value {
+    font-weight: 700;
+    color: #2c442a;
+    font-size: 0.86rem;
+  }
+
+  /* Section Titles */
+  .section-header-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2c442a;
+    margin-bottom: 16px;
+    padding-left: 10px;
+    border-left: 4px solid #486E46;
+  }
+
+  /* Quick Access Cards */
+  .quick-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eef0f2;
+    text-decoration: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+    height: calc(100% - 18px);
+  }
+
+  .quick-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-color: #486E46;
+  }
+
+  .quick-card .quick-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background-color: #486E46;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+  }
+
+  .quick-card .quick-info h6 {
+    margin: 0 0 3px 0;
+    font-weight: 700;
+    color: #2c442a;
+    font-size: 0.9rem;
+  }
+
+  .quick-card .quick-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    line-height: 1.2;
+  }
+
+  /* Change Password Link Button */
+  .btn-change-pwd {
+    background-color: #f4f8f4;
+    color: #385636;
+    border: 1px solid #d4e2d4;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
+
+  .btn-change-pwd:hover {
+    background-color: #486E46;
+    color: #ffffff;
+    border-color: #486E46;
+  }
+</style>
+
+<div class="container-fluid px-0">
+
+  <!-- Welcome Hero Banner -->
+  <div class="admin-welcome-hero">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h2>Welcome to Administration Portal</h2>
+        <p>Manage student records, staff accounts, academic schedules, and access analytical reports.</p>
+      </div>
+      <div class="col-md-4 text-md-right mt-3 mt-md-0">
+        <span class="badge badge-light p-2 font-weight-bold" style="color: #385636; font-size: 0.88rem;">
+          <i class="fas fa-user-shield mr-1"></i> Admin Portal
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout: Left Panel (Profile, Password & Counts) | Right Grid (Quick Operations) -->
+  <div class="row mb-4">
+
+    <!-- LEFT PANEL: Admin Profile, Password & Institutional Counts -->
+    <div class="col-lg-4 col-md-12 mb-4 mb-lg-0">
+
+      <!-- 1. Admin Login & Credentials Card -->
+      <div class="profile-card mb-3">
+        <div class="card-header-custom">
+          <span><i class="fas fa-user-shield mr-2" style="color: #486E46;"></i> Admin Credentials</span>
+          <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">Active</span>
+        </div>
+        <div class="card-body-custom">
+          <div class="text-center mb-3 pb-2" style="border-bottom: 3px dashed #f0f2ea;">
+            <span class="info-label"><i class="fas fa-user-circle mr-1 text-muted"></i> Login ID:</span>
+            <span class="info-value">{{ request.user.username|default:"Admin" }}</span>
+            <div class="mt-2">
+              <a href="{% url 'P_change_password' %}" class="btn-change-pwd shadow-sm">
+                  <i class="fas fa-key mr-1"></i> Change Password
+              </a>
+            </div>
+          </div>
+          <div class="info-list-item">
+            <span class="info-label">Role:</span>
+            <span class="info-value">Principal / Admin</span>
+          </div>
+          <div class="info-list-item">
+            <span class="info-label">System Status:</span>
+            <span class="info-value text-success"><i class="fas fa-circle mr-1" style="font-size: 8px;"></i> Online</span>
+          </div>
+        </div>
+
+
+      <!-- 2. Institutional Statistics Panel -->
+
+        <div class="card-header-custom">
+          <span><i class="fas fa-chart-pie mr-2" style="color: #486E46;"></i> Institutional Overview</span>
+          <span class="badge px-2 py-1" style="background-color: #e4ede4; color: #2c442a;">Metrics</span>
+        </div>
+        <div class="card-body-custom">
+          <div class="info-list-item">
+            <span class="info-label"><i class="fas fa-user-graduate mr-1 text-muted"></i> Total Students:</span>
+            <span class="badge px-2 py-1" style="background-color: #486E46; color: #ffffff; font-size: 0.85rem;">{{ total_students|default:"1,250" }}</span>
+          </div>
+          <div class="info-list-item">
+            <span class="info-label"><i class="fas fa-chalkboard-teacher mr-1 text-muted"></i> Total Teachers:</span>
+            <span class="badge px-2 py-1" style="background-color: #27ae60; color: #ffffff; font-size: 0.85rem;">{{ total_teachers|default:"85" }}</span>
+          </div>
+          <div class="info-list-item">
+            <span class="info-label"><i class="fas fa-school mr-1 text-muted"></i> Active Classes:</span>
+            <span class="badge px-2 py-1" style="background-color: #e67e22; color: #ffffff; font-size: 0.85rem;">{{ total_classes|default:"24" }}</span>
+          </div>
+          <div class="info-list-item">
+            <span class="info-label"><i class="fas fa-user-times mr-1 text-muted"></i> Today's Absentees:</span>
+            <span class="badge px-2 py-1" style="background-color: #e74c3c; color: #ffffff; font-size: 0.85rem;">{{ today_absentees|default:"14" }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Quick Access Operations Grid -->
+    <div class="col-lg-8 col-md-12">
+
+      <!-- Administration Operations -->
+      <h5 class="section-header-title">Quick Access — Administration</h5>
+      <div class="row">
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Student_admission' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-user-plus"></i></div>
+            <div class="quick-info">
+              <h6>New Admission</h6>
+              <p>Register new students</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Add_new_teacher' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div class="quick-info">
+              <h6>Add Teacher</h6>
+              <p>Create faculty profiles</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Admin_Student_Transfer' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-exchange-alt"></i></div>
+            <div class="quick-info">
+              <h6>Student Promotion</h6>
+              <p>Promote or transfer</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Academic Operations -->
+      <h5 class="section-header-title mt-2">Quick Access — Academic Operations</h5>
+      <div class="row">
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Admin_Schedule_Exam' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="quick-info">
+              <h6>Exam Schedule</h6>
+              <p>Setup exam timetables</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Admin_Mark_Verify' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-check-double"></i></div>
+            <div class="quick-info">
+              <h6>Verify Marks</h6>
+              <p>Review submitted marks</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Admin_NoticeIssue' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-bullhorn"></i></div>
+            <div class="quick-info">
+              <h6>Issue Notice</h6>
+              <p>Publish announcements</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Analytics & Reports -->
+      <h5 class="section-header-title mt-2">Quick Access — Analytics & Reports</h5>
+      <div class="row">
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Admin_AttendanceReport' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="quick-info">
+              <h6>Attendance Report</h6>
+              <p>Daily/monthly records</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Admin_MarkSheet' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-poll-h"></i></div>
+            <div class="quick-info">
+              <h6>Mark Sheets</h6>
+              <p>Generate result sheets</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'admin_student_info' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-id-card"></i></div>
+            <div class="quick-info">
+              <h6>Student Directory</h6>
+              <p>Search student records</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

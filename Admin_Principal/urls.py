@@ -1,0 +1,37 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+			path('',views.admin_home,name='admin_home'),
+			path('KrishnaView', views.KrishnaView, name='KrishnaView'),
+			path('Student_admission', views.Student_admission, name='Student_admission'),
+			path('Admin_EditStudent', views.Admin_EditStudent, name='Admin_EditStudent'),
+			path('get_students_by_class/', views.get_students_by_class, name='get_students_by_class'),
+			path('remove_student/', views.remove_student, name='remove_student'),
+			path('get_studnt_details/', views.get_student_details, name='get_student_details'),
+			path('Add_new_teacher/', views.Add_new_teacher, name='Add_new_teacher'),
+			path('Remove_Teacher/', views.Remove_Teacher, name='Remove_Teacher'),
+			path('Edit_Teacher/', views.Edit_Teacher, name='Edit_Teacher'),
+			path('Admin_AddEdit_Class/', views.Admin_AddEdit_Class, name='Admin_AddEdit_Class'),
+			path('get_class_details/', views.get_class_details, name='get_class_details'),
+			path('Admin_Student_Transfer/', views.Admin_Student_Transfer, name='Admin_Student_Transfer'),
+			path('Admin_Schedule_Exam/', views.Admin_Schedule_Exam, name='Admin_Schedule_Exam'),
+			path('Admin_Mark_Verify/', views.Admin_Mark_Verify, name='Admin_Mark_Verify'),
+			path('Admin_Set_TimeTable/', views.Admin_Set_TimeTable, name='Admin_Set_TimeTable'),
+			path('Admin_NoticeIssue/', views.Admin_NoticeIssue, name='Admin_NoticeIssue'),
+			path('Admin_LibraryBooks/', views.Admin_LibraryBooks, name='Admin_LibraryBooks'),
+			path('Admin_NoticeIssue/', views.Admin_NoticeIssue, name='Admin_NoticeIssue'),
+			path('admin_classinfo/', views.admin_classinfo, name='admin_classinfo'),
+			path('admin_student_info/', views.admin_student_info, name='admin_student_info'),
+			path('Admin_AttendanceReport/', views.Admin_AttendanceReport, name='Admin_AttendanceReport'),
+			path('Admin_Absenties/', views.Admin_Absenties, name='Admin_Absenties'),
+			path('Admin_LateArrivals/', views.Admin_LateArrivals, name='Admin_LateArrivals'),
+			path('Admin_MarkSheet/', views.Admin_MarkSheet, name='Admin_MarkSheet'),
+			path('Admin_ExamScheduleReport/', views.Admin_ExamScheduleReport, name='Admin_ExamScheduleReport'),
+			path('Admin_AcademicCalendarEntry/', views.Admin_AcademicCalendarEntry, name='Admin_AcademicCalendarEntry'),
+			path('Admin_Acknowledgements/', views.Admin_Acknowledgements, name='Admin_Acknowledgements'),
+			path('admin_home/', views.admin_home, name='admin_home'),
+			path('AdminPrincipalFrame/', views.AdminPrincipalFrame, name='AdminPrincipalFrame'),
+			path('change_password/', views.change_password, name='P_change_password'),
+
+]

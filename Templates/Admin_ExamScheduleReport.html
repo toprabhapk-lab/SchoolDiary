@@ -1,0 +1,152 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .report-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .report-header {
+        border-bottom: 2px solid #486E46;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        color: #333333;
+    }
+
+    .filter-btn {
+        background-color: #486E46;
+        color: #ffffff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .filter-btn:hover {
+        background-color: #385636;
+        color: #ffffff;
+    }
+
+    .table-custom-header {
+        background-color: #486E46;
+        color: #ffffff;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .exam-table th, .exam-table td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 14px;
+        padding: 12px 10px;
+    }
+
+    .badge-time {
+        background-color: #e67e22;
+        color: #ffffff;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-mark {
+        background-color: #486E46;
+        color: #ffffff;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="report-card">
+    <a class="badge badge-secondary float-md-right" style="font-size: 0.9rem; padding: 8px 12px;" href="{% url 'admin_home' %}">&lt;&lt; back</a>
+
+    <div class="report-header text-center">
+        <h2><strong>Exam Schedule Report</strong></h2>
+    </div>
+
+    <!-- Class Selector Form -->
+    <form method="GET" action="" class="row justify-content-center mb-4">
+        <div class="col-md-5 mb-3">
+            <label for="class_id" class="font-weight-bold">Select Class:</label>
+            <select name="class_id" id="class_id" class="form-control" required>
+                <option value="">-- Select Class --</option>
+                {% for cls in classes %}
+                    <option value="{{ cls.id }}" {% if cls.id == selected_class_id %}selected{% endif %}>
+                        {{ cls.Class_no }} - {{ cls.Section }} (Div: {{ cls.Division|default:"N/A" }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3 d-flex align-items-end">
+            <button type="submit" class="btn filter-btn btn-block">View Schedule</button>
+        </div>
+    </form>
+
+    {% if selected_class %}
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-secondary m-0">
+                Class: <strong>{{ selected_class.Class_no }}-{{ selected_class.Section }} ({{ selected_class.Division }})</strong>
+            </h4>
+            <span class="text-muted font-italic">Ordered by Exam Date (Descending)</span>
+        </div>
+
+        <div class="table-container">
+            <table class="table table-bordered table-striped exam-table">
+                <thead>
+                    <tr class="table-custom-header">
+                        <th style="width: 15%;">Exam Date</th>
+                        <th style="width: 20%;">Exam Name</th>
+                        <th style="width: 20%; text-align: left;">Subject</th>
+                        <th style="width: 25%;">Time Schedule</th>
+                        <th style="width: 20%;">Max Mark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in exam_schedules %}
+                        <tr>
+                            <td><strong>{{ exam.Date|date:"d M Y (D)" }}</strong></td>
+                            <td>{{ exam.Name }}</td>
+                            <td style="text-align: left;">
+                                <strong>{{ exam.Subject.Name }}</strong>
+                                <small class="text-muted d-block">Code: {{ exam.Subject.Code }}</small>
+                            </td>
+                            <td>
+                                <span class="badge badge-time">
+                                    {{ exam.TimeFrom|time:"h:i A" }} - {{ exam.TimeTo|time:"h:i A" }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-mark">
+                                    {{ exam.Max_mark }} Marks
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No examination schedule found for this class.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

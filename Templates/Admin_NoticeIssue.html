@@ -1,0 +1,69 @@
+{% extends 'AdminPrincipalFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #2c442a;">Issue Notice</h3>
+            <small class="text-muted">Compose and issue official notices for school announcements</small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="{% url 'admin_home' %}">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Notice Form Card -->
+    <div class="card shadow-sm border-0 mb-5" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span><i class="fas fa-bullhorn mr-2"></i> Notice Details</span>
+        </div>
+
+        <div class="card-body bg-white">
+            <form method="POST" action="{% url 'Admin_NoticeIssue' %}">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group col-md-5">
+                        <label class="font-weight-bold" style="color: #2c442a;">Title <span class="text-danger">*</span></label>
+                        <input type="text" name="Title" value="{{ request.POST.Title }}" class="form-control" placeholder="Enter Notice Title" style="border-color: #d4e2d4;" required>
+                    </div>
+                    <div class="form-group col-md-7">
+                        <label class="font-weight-bold" style="color: #2c442a;">Remark</label>
+                        <input type="text" name="Remark" value="{{ request.POST.Remark }}" class="form-control" placeholder="Enter Notice Remark" style="border-color: #d4e2d4;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label class="font-weight-bold" style="color: #2c442a;">Matter <span class="text-danger">*</span></label>
+                        <textarea name="Matter" class="form-control" placeholder="Enter Notice Matter" rows="5" style="border-color: #d4e2d4;" required>{{ request.POST.Matter }}</textarea>
+                    </div>
+                </div>
+
+                <div class="text-right mt-3">
+                    <button type="submit" class="btn text-white font-weight-bold px-4 py-2" style="background-color: #385636; border-color: #385636;">
+                        <i class="fas fa-paper-plane mr-1"></i> Save Notice
+                    </button>
+                    <a class="btn btn-secondary px-4 py-2 ml-2" href="{% url 'admin_home' %}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

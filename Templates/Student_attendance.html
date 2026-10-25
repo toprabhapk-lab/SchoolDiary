@@ -1,0 +1,230 @@
+{% extends 'StudentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm" style="border-left: 5px solid #486E46;">
+        <div>
+            <h3 class="font-weight-bold mb-0" style="color: #486E46;">Attendance & Late Arrival Report</h3>
+            <small class="text-muted">
+                Student: <strong style="color: #2c442a;">{{ student.Name }}</strong> |
+                Class: <strong style="color: #2c442a;">{{ student.Class.Class_no }} - {{ student.Class.Section }}</strong> |
+                Admission No: <strong style="color: #2c442a;">{{ student.Admission_no }}</strong>
+            </small>
+        </div>
+        <a class="btn btn-sm text-white" style="background-color: #385636; border-color: #385636;" href="javascript:history.back()">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Month & Year Filter Card -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px;">
+        <div class="card-body p-3 bg-white">
+            <form method="GET" class="form-inline justify-content-between align-items-center flex-wrap">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <h5 class="mb-0 font-weight-bold" style="color: #486E46;">
+                        <i class="fas fa-calendar-alt mr-2"></i> Select Month & Year
+                    </h5>
+                </div>
+                <div class="d-flex align-items-center flex-wrap">
+                    <label for="month" class="mr-2 font-weight-bold text-secondary">Month:</label>
+                    <select name="month" id="month" class="form-control form-control-sm mr-3 mb-2 mb-sm-0" style="border-color: #d4e2d4; min-width: 130px;">
+                        {% for m_num, m_name in months_list %}
+                            <option value="{{ m_num }}" {% if selected_month == m_num %}selected{% endif %}>
+                                {{ m_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="year" class="mr-2 font-weight-bold text-secondary">Year:</label>
+                    <select name="year" id="year" class="form-control form-control-sm mr-3 mb-2 mb-sm-0" style="border-color: #d4e2d4; min-width: 100px;">
+                        {% for y in years_list %}
+                            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>
+                                {{ y }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="btn btn-sm text-white" style="background-color: #486E46; border-color: #486E46;">
+                        <i class="fas fa-search mr-1"></i> View Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Monthly Summary Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-2">
+            <div class="p-3 rounded text-white d-flex justify-content-between align-items-center shadow-sm" style="background-color: #486E46;">
+                <div>
+                    <h6 class="mb-0 text-uppercase font-weight-bold" style="letter-spacing: 0.5px;">Absent Days ({{ selected_month_name }} {{ selected_year }})</h6>
+                </div>
+                <span class="badge badge-light px-3 py-2 font-weight-bold" style="font-size: 16px; color: #486E46;">{{ total_absent_days }} Days</span>
+            </div>
+        </div>
+        <div class="col-md-6 mb-2">
+            <div class="p-3 rounded text-white d-flex justify-content-between align-items-center shadow-sm" style="background-color: #385636;">
+                <div>
+                    <h6 class="mb-0 text-uppercase font-weight-bold" style="letter-spacing: 0.5px;">Late Arrivals ({{ selected_month_name }} {{ selected_year }})</h6>
+                </div>
+                <span class="badge badge-light px-3 py-2 font-weight-bold" style="font-size: 16px; color: #385636;">{{ total_late_arrivals }} Times</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Absence Report Table -->
+    <div class="card shadow-sm border-0 mb-5" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #486E46;">
+            <span>
+                <i class="fas fa-user-times mr-2"></i> Absence Report — {{ selected_month_name }} {{ selected_year }}
+            </span>
+        </div>
+
+        <div class="card-body p-0 bg-white">
+            {% if attendance_report %}
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0">
+                    <thead>
+                        <tr style="background-color: #f4f8f4; color: #2c442a;">
+                            <th class="text-center" style="width: 50px;">#</th>
+                            <th class="text-center" style="min-width: 130px;">Absent Date</th>
+                            <th class="text-center" style="min-width: 150px;">Parent Verified</th>
+                            <th class="text-center" style="min-width: 160px;">Leave Application</th>
+                            <th class="text-center" style="min-width: 140px;">Approval Status</th>
+                            <th>Reason / Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in attendance_report %}
+                        <tr>
+                            <td class="text-center align-middle font-weight-bold" style="color: #486E46;">
+                                {{ forloop.counter }}
+                            </td>
+                            <td class="text-center align-middle font-weight-bold" style="color: #d9534f;">
+                                {{ item.absent_date|date:"d M Y" }}
+                            </td>
+                            <!-- Parent Verification Badge -->
+                            <td class="text-center align-middle">
+                                {% if item.parent_verified %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #486E46;">
+                                        <i class="fas fa-check-circle mr-1"></i> Verified
+                                    </span>
+                                {% else %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #d9534f;">
+                                        <i class="fas fa-times-circle mr-1"></i> Not Verified
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <!-- Leave Application Submitted Status -->
+                            <td class="text-center align-middle">
+                                {% if item.has_leave_app %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #486E46;">
+                                        <i class="fas fa-file-alt mr-1"></i> Submitted
+                                    </span>
+                                {% else %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #6c757d;">
+                                        <i class="fas fa-minus-circle mr-1"></i> Not Submitted
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <!-- Approval Status -->
+                            <td class="text-center align-middle">
+                                {% if item.has_leave_app %}
+                                    {% if item.leave_status == 'Approved' %}
+                                        <span class="badge px-2 py-1 text-white" style="background-color: #486E46;">Approved</span>
+                                    {% elif item.leave_status == 'Pending' %}
+                                        <span class="badge px-2 py-1 text-white" style="background-color: #fce205; color: #333333 !important;">Pending</span>
+                                    {% else %}
+                                        <span class="badge px-2 py-1 text-white" style="background-color: #d9534f;">Rejected</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <!-- Reason / Remark -->
+                            <td class="align-middle">
+                                {% if item.has_leave_app %}
+                                    <div><strong>Reason:</strong> {{ item.leave_reason }}</div>
+                                    {% if item.leave_remark %}
+                                        <small class="text-muted"><strong>Remark:</strong> {{ item.leave_remark }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="fas fa-user-check fa-2x mb-2" style="color: #486E46;"></i>
+                <p class="mb-0">No absent records found for {{ selected_month_name }} {{ selected_year }}. Perfect attendance!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2. Late Arrival Report Table -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 8px; overflow: hidden;">
+        <div class="card-header text-white font-weight-bold d-flex justify-content-between align-items-center" style="background-color: #385636;">
+            <span>
+                <i class="fas fa-clock mr-2"></i> Late Arrival Report — {{ selected_month_name }} {{ selected_year }}
+            </span>
+        </div>
+
+        <div class="card-body p-0 bg-white">
+            {% if late_arrivals %}
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0">
+                    <thead>
+                        <tr style="background-color: #f4f8f4; color: #2c442a;">
+                            <th class="text-center" style="width: 50px;">#</th>
+                            <th class="text-center" style="min-width: 150px;">Date</th>
+                            <th class="text-center" style="min-width: 150px;">Arrival Time</th>
+                            <th class="text-center" style="min-width: 180px;">Parent Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for late in late_arrivals %}
+                        <tr>
+                            <td class="text-center align-middle font-weight-bold" style="color: #486E46;">
+                                {{ forloop.counter }}
+                            </td>
+                            <td class="text-center align-middle font-weight-bold" style="color: #2c442a;">
+                                {{ late.Date|date:"d M Y" }}
+                            </td>
+                            <td class="text-center align-middle font-weight-bold" style="color: #385636;">
+                                {{ late.Time|time:"h:i A" }}
+                            </td>
+                            <td class="text-center align-middle">
+                                {% if late.Parent_verification %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #486E46;">
+                                        <i class="fas fa-check-circle mr-1"></i> Verified
+                                    </span>
+                                {% else %}
+                                    <span class="badge px-2 py-1 text-white" style="background-color: #d9534f;">
+                                        <i class="fas fa-times-circle mr-1"></i> Not Verified
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="fas fa-regular fa-clock fa-2x mb-2" style="color: #486E46;"></i>
+                <p class="mb-0">No late arrival records found for {{ selected_month_name }} {{ selected_year }}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

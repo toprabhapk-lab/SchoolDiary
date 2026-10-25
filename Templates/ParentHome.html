@@ -1,0 +1,422 @@
+{% extends 'ParentFrame.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Hero Welcome Banner */
+  .parent-welcome-hero {
+    background: linear-gradient(135deg, #608e5c 0%, #3e833b 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 22px 28px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .parent-welcome-hero h2 {
+    font-weight: 700;
+    font-size: 1.65rem;
+    margin-bottom: 4px;
+    color: #ffffff;
+  }
+
+  .parent-welcome-hero p {
+    font-size: 0.92rem;
+    margin: 0;
+    opacity: 0.92;
+    color: #ffffff;
+  }
+
+  /* Profile Avatar Styling */
+  .student-avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #b6c58b;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Compact Profile Cards */
+  .compact-profile-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    border: 1px solid #eef0f2;
+    overflow: hidden;
+  }
+
+  .compact-profile-card .card-header-custom {
+    background-color: #f4f7e8;
+    color: #385636;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-bottom: 1px solid #e3ebd0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.95rem;
+  }
+
+  .compact-profile-card .card-body-custom {
+    padding: 14px 18px;
+  }
+
+  /* Compact Info Grid Layout */
+  .profile-grid-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed #f0f2ea;
+  }
+
+  .profile-grid-item:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.82rem;
+  }
+
+  .info-value {
+    font-weight: 700;
+    color: #2f331d;
+    font-size: 0.86rem;
+  }
+
+  /* Section Titles */
+  .section-header-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2f331d;
+    margin-bottom: 16px;
+    padding-left: 10px;
+    border-left: 4px solid #486E46;
+  }
+
+  /* Quick Access Cards */
+  .quick-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eef0f2;
+    text-decoration: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+    position: relative;
+    height: calc(100% - 18px);
+  }
+
+  .quick-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-color: #486E46;
+  }
+
+  .quick-card .quick-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background-color: #486E46;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+  }
+
+  .quick-card .quick-info h6 {
+    margin: 0 0 3px 0;
+    font-weight: 700;
+    color: #2f331d;
+    font-size: 0.9rem;
+  }
+
+  .quick-card .quick-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    line-height: 1.2;
+  }
+
+  /* Notification Indicator Badge */
+  .notification-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: #d32f2f;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(211, 47, 47, 0.3);
+  }
+
+  /* Change Password Link Button */
+  .btn-change-pwd {
+    background-color: #f4f7e8;
+    color: #385636;
+    border: 1px solid #b6c58b;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
+
+  .btn-change-pwd:hover {
+    background-color: #486E46;
+    color: #ffffff;
+    border-color: #486E46;
+  }
+
+
+
+
+
+</style>
+
+<div class="container-fluid px-0">
+
+  <!-- Welcome Hero Banner -->
+  <div class="parent-welcome-hero">
+    <div class="row align-items-center">
+      <div class="col-md-2 text-center text-md-left mb-2 mb-md-0">
+        <!-- Student Gender Avatar Condition -->
+        {% if parent.Student.Gender == 'Male' %}
+          <img src="{% static 'images/boy.png' %}" alt="Student Avatar" class="student-avatar-img">
+        {% else %}
+          <img src="{% static 'images/girl.png' %}" alt="Student Avatar" class="student-avatar-img">
+        {% endif %}
+      </div>
+      <div class="col-md-7">
+        <h2>Welcome, {{ parent.Father_name }} & {{ parent.Mother_name }}!</h2>
+        <p>SchoolDiary Parent Portal. Monitor your child's academic progress, attendance, circulars, and teacher details.</p>
+      </div>
+      <div class="col-md-3 text-md-right mt-2 mt-md-0">
+        <span class="badge badge-light p-2 font-weight-bold" style="color: #385636; font-size: 0.88rem;">
+          <i class="fas fa-id-card-alt mr-1"></i> Adm No: {{ parent.Student.Admission_no|default:"--" }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main 2-Column Grid Layout: Profile Info (Left) | Quick Access (Right) -->
+  <div class="row mb-4">
+
+    <!-- LEFT COLUMN: Child & Parent Profile + Class Teacher Details Stacked -->
+    <div class="col-lg-4 col-md-12 mb-4 mb-lg-0">
+
+      <!-- 1. Child & Guardian Profile Card -->
+      <div class="compact-profile-card mb-3">
+        <div class="card-header-custom">
+          <span><i class="fas fa-child mr-2" style="color: #486E46;"></i> Child & Guardian Profile</span>
+          {% if parent.Student.Class %}
+            <span class="badge px-2 py-1" style="background-color: #d2dc9b; color: #385636;">
+              Class {{ parent.Student.Class.Class_no }}-{{ parent.Student.Class.Section }} ({{ parent.Student.Class.Division|default:"-" }})
+            </span>
+          {% endif %}
+        </div>
+        <div class="card-body-custom">
+          <!-- Change Password Button Area -->
+          <div class="text-center mb-2 pb-2" style="border-bottom: 3px dashed #e3ebd0;">
+            <span class="info-label"><i class="fas fa-user-circle mr-1 text-muted"></i> Login ID:</span>
+            <span class="info-value">{{ parent.Student.Login.username|default:request.user.username }}</span>
+            <div class="mt-2">
+              <a href="{% url 'change_password' %}" class="btn-change-pwd shadow-sm">
+                  <i class="fas fa-key mr-1"></i> Change Password
+              </a>
+            </div>
+          </div>
+          <div class="profile-grid-item">
+            <span class="info-label"><i class="fas fa-user-graduate mr-1 text-muted"></i> Student:</span>
+            <span class="info-value">{{ parent.Student.Name|default:"--" }}</span>
+            (<span class="info-label"><i class="fas fa-list-ol mr-1 text-muted"></i> Roll No:</span>
+            <span class="info-value">{{ parent.Student.Roll_no|default:"--" }}</span>)
+          </div>
+
+          <div class="profile-grid-item">
+            <span class="info-label"><i class="fas fa-user mr-1 text-muted"></i> Father :</span>
+            <span class="info-value">{{ parent.Father_name|default:"--" }}</span>
+          </div>
+
+          <div class="profile-grid-item">
+            <span class="info-label"><i class="fas fa-female mr-1 text-muted"></i> Mother :</span>
+            <span class="info-value">{{ parent.Mother_name|default:"--" }}</span>
+          </div>
+          <div class="text-right mt-2">
+                <a href="{% url 'Parent_PersonalData' %}" class="btn-change-pwd shadow-sm">Detailed Profile <i class="fas fa-id-card ml-1"></i></a>
+          </div>
+        </div>
+
+      <!-- 2. Class Teacher Details Card -->
+        <div class="card-header-custom border-top">
+          <span><i class="fas fa-chalkboard-teacher mr-2" style="color: #486E46;"></i> Class Teacher Details</span>
+          <span class="badge px-2 py-1" style="background-color: #d2dc9b; color: #385636;">Contact</span>
+        </div>
+        <div class="card-body-custom">
+          {% if parent.Student.Class.Class_teacher %}
+            <div class="profile-grid-item">
+              <span class="info-label"><i class="fas fa-user-tie mr-1 text-muted"></i> Name:</span>
+              <span class="info-value">{{ parent.Student.Class.Class_teacher.Name }}</span>
+            </div>
+
+            <div class="profile-grid-item">
+              <span class="info-label"><i class="fas fa-briefcase mr-1 text-muted"></i> Designation:</span>
+              <span class="info-value">{{ parent.Student.Class.Class_teacher.Designation|default:"Class Teacher" }}</span>
+            </div>
+            <div class="profile-grid-item">
+              <span class="info-label"><i class="fas fa-phone-alt mr-1 text-muted"></i> Mobile:</span>
+              <span class="info-value">{{ parent.Student.Class.Class_teacher.MobileNumber|default:"--" }}</span>
+            </div>
+            <div class="profile-grid-item">
+              <span class="info-label"><i class="fas fa-envelope mr-1 text-muted"></i> Email:</span>
+              <span class="info-value" style="font-size: 0.8rem;">{{ parent.Student.Class.Class_teacher.Email|default:"--" }}</span>
+            </div>
+          {% else %}
+            <div class="text-center text-muted py-3">
+              <i class="fas fa-info-circle fa-2x mb-2" style="color: #486E46;"></i>
+              <p class="mb-0 small">No Class Teacher assigned to this class.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Quick Access Grid -->
+    <div class="col-lg-8 col-md-12">
+      <h5 class="section-header-title">Quick Access — Guardian Corner</h5>
+
+      <div class="row">
+        <!-- Row 1 -->
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_Notice' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-bullhorn"></i></div>
+            <div class="quick-info">
+              <h6>School Notices</h6>
+              <p>Circulars & notices</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_TimeTable' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-table"></i></div>
+            <div class="quick-info">
+              <h6>Time Table</h6>
+              <p>Daily class schedule</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- Communication with Unreplied Indicator -->
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_Communication' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-comments"></i></div>
+            <div class="quick-info">
+              <h6>Communication</h6>
+              <p>Queries/replies to teachers</p>
+            </div>
+            {% if unreplied_communication_count and unreplied_communication_count > 0 %}
+              <span class="notification-badge" title="Unreplied Teacher Messages">{{ unreplied_communication_count }} New</span>
+            {% endif %}
+          </a>
+        </div>
+
+        <!-- Row 2 -->
+        <!-- Academic Progress with Unverified Marks Indicator -->
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_Progress' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="quick-info">
+              <h6>Academic Progress</h6>
+              <p>Track marks & grades</p>
+            </div>
+            {% if unverified_marks_count and unverified_marks_count > 0 %}
+              <span class="notification-badge" title="Unverified Academic Marks">{{ unverified_marks_count }} New</span>
+            {% endif %}
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_AcademicCalendar' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="quick-info">
+              <h6>Academic Calendar</h6>
+              <p>Holidays & events</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_Homework' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-book-reader"></i></div>
+            <div class="quick-info">
+              <h6>Homework</h6>
+              <p>Assigned tasks</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- Row 3 -->
+        <!-- Attendance with Unverified Leaves Indicator -->
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_Attendance' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-user-check"></i></div>
+            <div class="quick-info">
+              <h6>Attendance</h6>
+              <p>Daily attendance history</p>
+            </div>
+            {% if unverified_attendance_count and unverified_attendance_count > 0 %}
+              <span class="notification-badge" title="Unverified Leaves">{{ unverified_attendance_count }} New</span>
+            {% endif %}
+          </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'Parent_LeaveApplication' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-file-signature"></i></div>
+            <div class="quick-info">
+              <h6>Leave Application</h6>
+              <p>Apply for absence</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- Acknowledgements with Unverified Indicator -->
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'parent_acknowledgement' %}" class="quick-card">
+            <div class="quick-icon"><i class="fas fa-check-double"></i></div>
+            <div class="quick-info">
+              <h6>Acknowledgements</h6>
+              <p>Credit points & remarks</p>
+            </div>
+            {% if pending_acknowledgements_count and pending_acknowledgements_count > 0 %}
+              <span class="notification-badge" title="Unverified Acknowledgements">{{ pending_acknowledgements_count }} New</span>
+            {% endif %}
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
